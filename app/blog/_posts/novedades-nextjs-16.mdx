@@ -1,0 +1,209 @@
+---
+title: 'Las novedades más importantes de Next.js 16'
+publishedAt: '2026-05-02'
+summary: 'Un repaso claro de los cambios más importantes de Next.js 16: Cache Components, nuevas APIs de caché, proxy.ts, Turbopack por defecto y los breaking changes que conviene revisar antes de migrar.'
+---
+
+Next.js 16 no es una versión menor con retoques superficiales. Cambia varias piezas que afectan la forma de pensar una aplicación: la caché es más explícita, el enrutado gana claridad, Turbopack pasa a ser el bundler por defecto y el sistema empuja con más fuerza hacia patrones modernos de React y del App Router.
+
+Si vienes de Next 15, estas son las novedades que más impacto tienen en el trabajo diario.
+
+## 1. 🧱 Cache Components: caché explícita y más predecible
+
+La novedad más importante de Next.js 16 es **Cache Components**. El cambio de fondo es simple de explicar: en lugar de depender tanto de caché implícita, ahora el modelo empuja a declarar qué partes quieres cachear con más claridad.
+
+Eso se apoya en la directiva `use cache` y en un enfoque que combina mejor con **Partial Prerendering (PPR)**: una página puede tener una base estática rápida y luego cargar partes dinámicas dentro de `Suspense`.
+
+### Ejemplo de configuración
+
+```ts
+// next.config.ts
+const nextConfig = {
+  cacheComponents: true,
+};
+
+export default nextConfig;
+```
+
+### Ejemplo de uso
+
+```tsx
+import { Suspense } from 'react';
+
+function StaticShell() {
+  return <h1>Catálogo</h1>;
+}
+
+async function ProductPanel() {
+  'use cache';
+
+  const products = await getProducts();
+
+  return <pre>{JSON.stringify(products, null, 2)}</pre>;
+}
+
+export default function Page() {
+  return (
+    <>
+      <StaticShell />
+      <Suspense fallback={<p>Cargando productos...</p>}>
+        <ProductPanel />
+      </Suspense>
+    </>
+  );
+}
+```
+
+La ventaja práctica es que la intención se vuelve más legible: qué se cachea, qué se prerenderiza y qué se resuelve en tiempo de request.
+
+## 2. 🔁 Cambios importantes en las APIs de caché
+
+Next.js 16 refina bastante el conjunto de APIs para invalidación y revalidación. La idea ya no es solo “borrar caché”, sino distinguir mejor entre invalidez, revalidación y lectura inmediata de datos nuevos.
+
+### `revalidateTag()` ahora pide perfil
+
+En Next 16, `revalidateTag()` ya no se usa igual que antes cuando quieres comportamiento stale-while-revalidate. Ahora recibe un perfil como segundo argumento.
+
+```tsx
+import { revalidateTag } from 'next/cache';
+
+revalidateTag('blog-posts', 'max');
+revalidateTag('news-feed', 'hours');
+revalidateTag('analytics', { expire: 3600 });
+```
+
+Para contenido que tolera consistencia eventual, esta forma es más clara que el patrón anterior.
+
+### `updateTag()` para leer datos frescos enseguida
+
+Cuando estás dentro de una Server Action y quieres que el usuario vea su cambio al instante, `updateTag()` es la API que más sentido tiene. Está pensada para escenarios de read-your-writes.
+
+```tsx
+'use server';
+
+import { updateTag } from 'next/cache';
+
+export async function updateUserProfile(userId: string) {
+  await updateProfileInDatabase(userId);
+  updateTag(`user-${userId}`);
+}
+```
+
+### `refresh()` para refrescar datos no cacheados
+
+Otra API nueva es `refresh()`, útil cuando quieres volver a leer datos no cacheados sin tocar directamente la caché existente.
+
+```tsx
+'use server';
+
+import { refresh } from 'next/cache';
+
+export async function markNotificationAsRead(notificationId: string) {
+  await markAsRead(notificationId);
+  refresh();
+}
+```
+
+### `cacheLife()` y `cacheTag()`
+
+Next 16 también hace más visible el control de tiempo y etiquetas de caché. `cacheLife()` define perfiles como `seconds`, `minutes`, `hours`, `days`, `weeks` o `max`, y `cacheTag()` ayuda a etiquetar entradas cacheadas para invalidarlas con precisión.
+
+```tsx
+import { cacheLife, cacheTag } from 'next/cache';
+
+export async function loadMarketingPage() {
+  'use cache';
+  cacheLife('hours');
+  cacheTag('marketing');
+
+  return getMarketingContent();
+}
+```
+
+## 3. 🚪 `proxy.ts` reemplaza a `middleware.ts`
+
+Otro cambio fácil de notar es el nuevo nombre para la capa de interceptación: **`proxy.ts`**. La lógica puede seguir siendo muy parecida, pero el nombre hace más explícito que estás actuando en el borde de red de la aplicación.
+
+### Antes
+
+```tsx
+// middleware.ts
+export default function middleware(request: Request) {
+  return Response.redirect(new URL('/home', request.url));
+}
+```
+
+### Ahora
+
+```tsx
+// proxy.ts
+export default function proxy(request: Request) {
+  return Response.redirect(new URL('/home', request.url));
+}
+```
+
+La ventaja no es solo semántica. También ayuda a que el proyecto comunique mejor el propósito real de ese archivo, y evita usar “middleware” para algo que en la práctica es un proxy de borde.
+
+## 4. ⚡ Turbopack pasa a ser el bundler por defecto
+
+En Next.js 16, **Turbopack** ya es el bundler por defecto. Esto importa porque cambia el punto de partida de casi cualquier proyecto nuevo: mejores tiempos de build, mejor Fast Refresh y una experiencia más rápida sin tener que activarlo manualmente.
+
+Si tienes configuraciones muy personalizadas con webpack, todavía puedes seguir usando webpack, pero el camino recomendado ya está claramente alineado con Turbopack.
+
+### Qué notarás
+
+- builds más rápidos en muchos proyectos;
+- arranque más ágil en desarrollo;
+- mejor comportamiento en repositorios grandes;
+- menos configuración necesaria para llegar a buen rendimiento.
+
+## 5. 🧭 Mejor navegación y prefetch
+
+Next 16 también mejora la navegación con deduplicación de layouts e incremental prefetching. En la práctica, eso reduce transferencia innecesaria cuando varias rutas comparten estructura.
+
+El impacto se siente especialmente en aplicaciones con listas largas, menús densos o muchas rutas con layouts comunes. El prefetch deja de comportarse como “bajar páginas completas por si acaso” y pasa a parecerse más a un sistema que recicla y reutiliza mejor lo ya cargado.
+
+## 6. 🧪 React 19.2 viene integrado en el App Router
+
+Next.js 16 acompaña a React 19.2 en el App Router. Eso no significa que tengas que aprender una interfaz nueva, pero sí que aparecen capacidades muy útiles dentro de la base del framework.
+
+Entre lo más visible están:
+
+- `useEffectEvent` para sacar lógica no reactiva de los efectos;
+- `ViewTransition` para transiciones visuales más suaves;
+- `Activity` para ocultar UI en segundo plano sin perder estado.
+
+Esto encaja bien con la dirección general de Next 16: más foco en experiencia de usuario y menos código de soporte alrededor.
+
+## 7. ⚠️ Cambios que conviene revisar antes de migrar
+
+Hay varios cambios de comportamiento y removals que pueden romper una app si actualizas sin revisar.
+
+Los más importantes son:
+
+- `params`, `searchParams`, `cookies()`, `headers()` y `draftMode()` pasan a uso asíncrono;
+- los slots de parallel routes necesitan `default.js` explícito;
+- `next lint` ya no forma parte del flujo estándar;
+- `next/image` cambió defaults como `qualities`, `imageSizes` y el cache TTL;
+- `middleware.ts` queda deprecado en favor de `proxy.ts`;
+- `revalidateTag()` cambia de firma para el comportamiento SWR.
+
+Si tu aplicación usa App Router, esta revisión vale más que cualquier novedad aislada: muchas migraciones fallan por un detalle de compatibilidad y no por una API nueva.
+
+## 8. 🧠 Qué cambia en la práctica
+
+La mejora más importante de Next.js 16 no es una sola feature. Es la combinación de varios ajustes que hacen el framework más explícito y más rápido de usar:
+
+- la caché se entiende mejor;
+- el prerender se mezcla mejor con contenido dinámico;
+- el enrutado y el prefetch son más eficientes;
+- la superficie de configuración se vuelve más clara;
+- el proyecto se alinea con patrones modernos de React.
+
+Eso hace que Next 16 se sienta menos como una versión incremental y más como una consolidación de la arquitectura que el App Router venía buscando.
+
+## ✍️ Conclusión
+
+Si tuviera que resumir Next.js 16 en una frase, diría esto: hace más explícito el modelo de renderizado y caché, mientras mejora rendimiento y claridad del stack.
+
+Las novedades que más valen la pena conocer son **Cache Components**, `revalidateTag()` con perfil, `updateTag()`, `refresh()`, `proxy.ts` y Turbopack como default. Si vas a migrar, empieza por los breaking changes; si vas a iniciar un proyecto nuevo, la versión ya te pone en una ruta bastante más moderna desde el primer día.

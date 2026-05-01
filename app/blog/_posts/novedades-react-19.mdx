@@ -1,0 +1,194 @@
+---
+title: 'Las novedades más importantes de React 19'
+publishedAt: '2026-05-02'
+summary: 'Un repaso práctico de las mejoras más importantes de React 19: Actions, formularios, refs, useOptimistic y otras piezas que simplifican el trabajo diario.'
+---
+
+React 19 no cambia la idea central de React, pero sí hace varias cosas mucho más simples. La versión se siente como una limpieza importante del modelo mental: menos código de pegamento, mejor soporte para formularios y una integración más natural con async y con APIs modernas.
+
+Si vienes de versiones anteriores, estas son las novedades que realmente vale la pena conocer.
+
+## 1. 🧩 Actions: el nuevo centro de la interacción async
+
+Una de las ideas más importantes de React 19 es el concepto de **Actions**. En vez de repartir lógica de envío, loading y errores por varios lugares, React empuja ese trabajo hacia una sola función asíncrona que representa la intención del usuario.
+
+Eso hace que acciones como guardar un formulario, crear un comentario o actualizar un perfil se lean mejor y requieran menos estado manual.
+
+### Ejemplo
+
+```tsx
+'use client';
+
+import { useActionState } from 'react';
+
+type State = {
+  message: string;
+};
+
+async function submitProfile(previousState: State, formData: FormData): Promise<State> {
+  const name = String(formData.get('name') ?? '');
+
+  if (!name.trim()) {
+    return { message: 'El nombre es obligatorio.' };
+  }
+
+  return { message: `Perfil guardado para ${name}` };
+}
+
+export function ProfileForm() {
+  const [state, formAction, isPending] = useActionState(submitProfile, { message: '' });
+
+  return (
+    <form action={formAction} className='space-y-3'>
+      <input name='name' placeholder='Tu nombre' />
+      <button type='submit' disabled={isPending}>
+        {isPending ? 'Guardando...' : 'Guardar'}
+      </button>
+      <p>{state.message}</p>
+    </form>
+  );
+}
+```
+
+La ventaja real aquí no es solo menos código. También es que el flujo de datos se vuelve más claro: el formulario dispara una acción y React gestiona el estado asociado a esa transición.
+
+## 2. 📝 Formularios más simples con `useActionState` y `useFormStatus`
+
+React 19 mejora bastante la experiencia con formularios. `useActionState` te ayuda a conectar el resultado de una acción con la UI, y `useFormStatus` permite leer el estado del formulario sin tener que propagar props por todos lados.
+
+### Ejemplo de `useFormStatus`
+
+```tsx
+'use client';
+
+import { useFormStatus } from 'react-dom';
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+
+  return (
+    <button type='submit' disabled={pending}>
+      {pending ? 'Enviando...' : 'Enviar'}
+    </button>
+  );
+}
+
+export function ContactForm() {
+  return (
+    <form action='/api/contact' method='post'>
+      <input name='email' type='email' />
+      <SubmitButton />
+    </form>
+  );
+}
+```
+
+Esto reduce el típico estado duplicado de `loading`, `submitting` o `disabled` que antes terminaba repartido entre varios componentes.
+
+## 3. ✨ `useOptimistic` para respuestas inmediatas
+
+Otra mejora importante es `useOptimistic`, que permite mostrar una actualización provisional mientras esperas la confirmación del servidor.
+
+Es especialmente útil en interfaces donde la sensación de velocidad importa: likes, mensajes, comentarios, tareas o favoritos.
+
+### Ejemplo
+
+```tsx
+'use client';
+
+import { useOptimistic } from 'react';
+
+type Comment = {
+  id: string;
+  text: string;
+};
+
+export function CommentsList({ comments }: { comments: Comment[] }) {
+  const [optimisticComments, addOptimisticComment] = useOptimistic(comments, (currentComments, newComment: Comment) => [
+    ...currentComments,
+    newComment,
+  ]);
+
+  async function handleAddComment(formData: FormData) {
+    const text = String(formData.get('text') ?? '').trim();
+    if (!text) return;
+
+    addOptimisticComment({ id: crypto.randomUUID(), text });
+    await fetch('/api/comments', {
+      method: 'POST',
+      body: JSON.stringify({ text }),
+    });
+  }
+
+  return (
+    <form action={handleAddComment}>
+      <ul>
+        {optimisticComments.map((comment) => (
+          <li key={comment.id}>{comment.text}</li>
+        ))}
+      </ul>
+      <input name='text' placeholder='Escribe un comentario' />
+    </form>
+  );
+}
+```
+
+La clave es que la interfaz responde al instante, pero sin perder el control sobre el estado real cuando llega la respuesta final.
+
+## 4. 🔁 `ref` como prop: menos dependencia de `forwardRef`
+
+React 19 simplifica una pieza histórica del ecosistema: `ref` pasa a ser más natural como prop en componentes funcionales. Eso hace que muchos componentes sean más fáciles de leer y evita el salto mental de tener que envolverlos con `forwardRef` por defecto.
+
+### Antes
+
+```tsx
+import { forwardRef } from 'react';
+
+export const Input = forwardRef<HTMLInputElement, React.ComponentProps<'input'>>(function Input(props, ref) {
+  return <input ref={ref} {...props} />;
+});
+```
+
+### Ahora
+
+```tsx
+type Props = React.ComponentProps<'input'> & {
+  ref?: React.Ref<HTMLInputElement>;
+};
+
+export function Input({ ref, ...props }: Props) {
+  return <input ref={ref} {...props} />;
+}
+```
+
+No siempre cambia el comportamiento final, pero sí reduce fricción al construir componentes reutilizables.
+
+## 5. 📦 `use` para consumir recursos de forma más directa
+
+`use` permite leer un valor, una promesa o un contexto de forma más flexible dentro de componentes. En combinación con Suspense, hace que el código relacionado con datos asíncronos se vea menos forzado.
+
+Esto no significa que todo deba hacerse así, pero sí abre una vía más limpia para escenarios donde el componente depende de un recurso que puede suspenderse.
+
+## 6. 🏷️ Mejor integración con metadatos y recursos del documento
+
+React 19 también mejora cómo se manejan ciertos elementos del documento, como metadatos y recursos que afectan al `<head>`. El objetivo es que la experiencia con títulos, preloads y otros recursos sea más coherente, sobre todo en apps que mezclan cliente y servidor.
+
+Esto se nota menos en el código de un componente aislado, pero mucho en aplicaciones reales donde la navegación, la carga y el SEO importan.
+
+## 7. 🧠 Qué cambia en la práctica
+
+La mejora más importante de React 19 no es un único hook nuevo. Es la combinación de varias piezas que empujan hacia un patrón más limpio:
+
+- menos efectos usados como parche;
+- menos estado intermedio para formularios;
+- menos código manual para estados pendientes;
+- mejores respuestas visuales ante acciones del usuario;
+- componentes más directos al trabajar con refs.
+
+En otras palabras: React 19 no solo añade APIs, también reduce fricción en problemas que antes obligaban a escribir más infraestructura de la necesaria.
+
+## ✍️ Conclusión
+
+Si tuviera que resumir React 19 en una frase, diría esto: hace que las interacciones async se sientan más nativas y que muchos patrones habituales requieran menos código.
+
+Las novedades más valiosas son `Actions`, `useActionState`, `useFormStatus`, `useOptimistic` y el cambio en `ref` como prop. El resto complementa esa dirección: menos ruido, más intención y una API más alineada con el tipo de aplicaciones que construimos hoy.

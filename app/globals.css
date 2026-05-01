@@ -1,26 +1,78 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@import '@heroui/styles';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* custom */
+    --app-body-bg:
+      radial-gradient(circle at top, rgba(99, 102, 241, 0.1), transparent 36%),
+      linear-gradient(180deg, #f8fafc 0%, #f1f5f9 55%, #e2e8f0 100%);
+    --app-border: rgba(15, 23, 42, 0.12);
+    --app-blob: rgba(15, 23, 42, 0.12);
+  }
+
+  .dark {
+    /* global HeroUI variables */
+    --surface: rgba(255, 255, 255, 0.05);
+
+    /* custom */
+    --app-body-bg:
+      radial-gradient(circle at top, rgba(148, 163, 184, 0.12), transparent 32%),
+      linear-gradient(180deg, #0a0a0f 0%, #0e0e14 42%, #111218 100%);
+    --app-border: rgba(255, 255, 255, 0.12);
+    --app-blob: rgba(255, 255, 255, 0.08);
+  }
+
+  body {
+    min-height: 100vh;
+    background: var(--app-body-bg);
+  }
+
+  ::selection {
+    background: rgba(148, 163, 184, 0.25);
+    color: inherit;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme {
+  /* custom */
+  --color-foreground-2: color-mix(in lab, var(--color-foreground) 80%, transparent);
+}
+
+@layer components {
+  /* overrides */
+  .card--default {
+    @apply border border-(--app-border) backdrop-blur-xl;
+  }
+  .chip--default {
+    @apply text-foreground/70 border border-(--app-border) backdrop-blur-xl;
+  }
+}
+
+pre::-webkit-scrollbar {
+  display: none;
+}
+
+pre {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Remove Safari input shadow on mobile */
+input[type='text'],
+input[type='email'] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+table {
+  display: block;
+  max-width: fit-content;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.title {
+  text-wrap: balance;
 }

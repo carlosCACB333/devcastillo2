@@ -1,0 +1,155 @@
+.prose .anchor {
+  visibility: hidden;
+  position: absolute;
+  margin-left: -1em;
+  padding-right: 0.5em;
+  width: 80%;
+  max-width: 700px;
+  cursor: pointer;
+}
+
+.prose .anchor:hover,
+.prose *:hover > .anchor {
+  visibility: visible;
+}
+
+.prose .anchor::after {
+  content: '#';
+}
+
+.prose {
+  --prose-heading: var(--color-foreground);
+  --prose-body: var(--color-foreground-2);
+  --prose-muted: var(--muted);
+  --prose-border: var(--border);
+  --prose-surface: color-mix(in oklab, var(--color-background) 84%, var(--color-default) 16%);
+  --prose-surface-strong: color-mix(in oklab, var(--color-background) 72%, var(--color-default) 28%);
+  --prose-shadow: 0 12px 28px color-mix(in oklab, var(--color-foreground) 12%, transparent);
+}
+
+.prose img {
+  /* Don't apply styles to next/image */
+  margin: 0;
+  border-radius: 1rem;
+  box-shadow: var(--prose-shadow);
+}
+
+.prose p {
+  margin-top: 1.25rem;
+  margin-bottom: 1.25rem;
+  font-size: 1.03rem;
+  line-height: 2rem;
+  color: var(--prose-body);
+}
+
+.prose h1 {
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  font-size: 2.25rem;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  color: var(--prose-heading);
+}
+
+.prose h2 {
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--prose-heading);
+}
+
+.prose h3 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--prose-heading);
+}
+
+.prose h4 {
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--prose-heading);
+}
+
+.prose strong {
+  font-weight: 600;
+}
+
+.prose ul {
+  list-style-type: disc;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.prose ol {
+  list-style-type: decimal;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+}
+
+.prose ul > li,
+.prose ol > li {
+  margin-top: 0.5rem;
+}
+
+.prose blockquote {
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-left: 2px solid var(--prose-border);
+  padding-left: 1.5rem;
+  font-style: italic;
+  color: var(--prose-muted);
+}
+
+.prose hr {
+  margin-top: 2.5rem;
+  margin-bottom: 2.5rem;
+  border-color: var(--prose-border);
+}
+
+.prose table {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 1rem;
+  border: 1px solid var(--prose-border);
+  background: var(--prose-surface);
+  text-align: left;
+  box-shadow: 0 1px 2px color-mix(in oklab, var(--color-foreground) 6%, transparent);
+}
+
+.prose th {
+  border-bottom: 1px solid var(--prose-border);
+  background: var(--prose-surface-strong);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--prose-heading);
+}
+
+.prose td {
+  border-bottom: 1px solid var(--prose-border);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--prose-body);
+}
+
+.prose > :first-child {
+  /* Override removing top margin, causing layout shift */
+  margin-top: 1.25em !important;
+  margin-bottom: 1.25em !important;
+}

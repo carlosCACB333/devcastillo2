@@ -1,0 +1,233 @@
+---
+title: 'Quizás no necesites un Efecto'
+publishedAt: '2026-05-01'
+summary: 'Muchas veces usamos useEffect para resolver problemas que se pueden solucionar más fácil con estado, props o eventos. Este post muestra alternativas simples.'
+---
+
+En React, `useEffect` es útil cuando necesitas conectar tu componente con algo externo: una API, el DOM, una suscripción o un temporizador. El problema aparece cuando lo usamos para todo. Si algo se puede calcular durante el render, casi siempre es mejor hacerlo ahí.
+
+La idea central es simple: antes de escribir un efecto, pregúntate si realmente estás sincronizando con el exterior o solo estás derivando datos dentro del componente. Si es lo segundo, probablemente no necesitas un efecto.
+
+## 1. 🧠 Si puedes calcularlo, calcúlalo
+
+Un error muy común es guardar en estado algo que ya se puede obtener a partir de otras props o estados.
+
+### ❌ Mal
+
+```tsx
+import { useEffect, useState } from 'react';
+
+type Props = {
+  firstName: string;
+  lastName: string;
+};
+
+export function UserBadge({ firstName, lastName }: Props) {
+  const [fullName, setFullName] = useState('');
+
+  useEffect(() => {
+    setFullName(`${firstName} ${lastName}`);
+  }, [firstName, lastName]);
+
+  return <p>{fullName}</p>;
+}
+```
+
+Aquí el efecto solo copia datos que ya existían. Eso agrega complejidad sin aportar valor.
+
+### ✅ Correcto
+
+```tsx
+type Props = {
+  firstName: string;
+  lastName: string;
+};
+
+export function UserBadge({ firstName, lastName }: Props) {
+  const fullName = `${firstName} ${lastName}`;
+
+  return <p>{fullName}</p>;
+}
+```
+
+Aquí no hace falta un efecto ni un estado extra. El nombre completo es un dato derivado, así que se calcula directamente.
+
+Otro ejemplo típico es filtrar una lista. En vez de copiar el resultado a un estado separado, filtra en el render:
+
+```tsx
+type Task = {
+  id: number;
+  done: boolean;
+  title: string;
+};
+
+type Props = {
+  tasks: Task[];
+};
+
+export function TaskList({ tasks }: Props) {
+  const openTasks = tasks.filter((task) => !task.done);
+
+  return (
+    <ul>
+      {openTasks.map((task) => (
+        <li key={task.id}>{task.title}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+## 2. 🖱️ Si ocurre por una acción, usa el evento
+
+Muchas veces un efecto aparece solo porque queremos reaccionar a un botón, un formulario o una interacción del usuario.
+
+### ❌ Mal
+
+```tsx
+import { useEffect, useState } from 'react';
+
+export function SaveButton() {
+  const [clicked, setClicked] = useState(false);
+
+  useEffect(() => {
+    if (!clicked) {
+      return;
+    }
+
+    fetch('/api/save', { method: 'POST' });
+  }, [clicked]);
+
+  return <button onClick={() => setClicked(true)}>Guardar</button>;
+}
+```
+
+Aquí el efecto intenta “escuchar” un clic que ya se puede manejar directamente.
+
+### ✅ Correcto
+
+En ese caso, lo más claro es hacer el trabajo dentro del manejador del evento.
+
+```tsx
+import { useState } from 'react';
+
+export function SaveButton() {
+  const [saving, setSaving] = useState(false);
+
+  async function handleSave() {
+    setSaving(true);
+    try {
+      await fetch('/api/save', { method: 'POST' });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <button onClick={handleSave} disabled={saving}>
+      {saving ? 'Guardando...' : 'Guardar'}
+    </button>
+  );
+}
+```
+
+No hace falta un efecto para “detectar” el clic. El clic ya es el lugar correcto para ejecutar la lógica.
+
+## 3. 🔁 Si solo quieres copiar props a estado, revisa la idea
+
+Otro patrón que suele complicar los componentes es usar `useEffect` para mantener una copia local de una prop.
+
+### ❌ Mal
+
+```tsx
+import { useEffect, useState } from 'react';
+
+type Props = {
+  initialName: string;
+};
+
+export function ProfileForm({ initialName }: Props) {
+  const [name, setName] = useState(initialName);
+
+  useEffect(() => {
+    setName(initialName);
+  }, [initialName]);
+
+  return <input value={name} onChange={(e) => setName(e.target.value)} />;
+}
+```
+
+Este enfoque parece razonable, pero suele traer problemas:
+
+- añade un render extra;
+- hace más difícil seguir el flujo de datos;
+- puede borrar cambios del usuario si la prop cambia.
+
+### ✅ Correcto
+
+Muchas veces una mejor opción es decidir quién “posee” el dato. Si el formulario necesita editar el valor, probablemente ese estado debería vivir ahí desde el principio, o venir de una clave distinta cuando quieras reiniciarlo.
+
+```tsx
+import { useState } from 'react';
+
+type Props = {
+  initialName: string;
+};
+
+export function ProfileForm({ initialName }: Props) {
+  const [name, setName] = useState(initialName);
+
+  return <input value={name} onChange={(e) => setName(e.target.value)} />;
+}
+```
+
+Si necesitas reiniciar el formulario, suele ser mejor cambiar la `key` del componente o controlar el estado desde el padre.
+
+## 4. 🌐 Usa efecto cuando hables con algo externo
+
+Hay casos en los que `useEffect` sí es la herramienta correcta. Por ejemplo:
+
+- suscribirte a un servicio 📡;
+- sincronizar el título de la página 🧾;
+- conectar una librería externa 🧩;
+- escuchar eventos del navegador 🎧;
+- limpiar recursos cuando el componente desaparece 🧹.
+
+```tsx
+import { useEffect } from 'react';
+
+type Props = {
+  title: string;
+};
+
+export function PageTitle({ title }: Props) {
+  useEffect(() => {
+    const previousTitle = document.title;
+    document.title = title;
+
+    return () => {
+      document.title = previousTitle;
+    };
+  }, [title]);
+
+  return null;
+}
+```
+
+Aquí sí tiene sentido. El componente está sincronizando una parte de la interfaz con un sistema externo: el navegador.
+
+## 5. 🧭 Una regla mental sencilla
+
+Antes de escribir un efecto, prueba esta pregunta:
+
+- ¿Esto depende de una interacción? Usa el evento ⚡.
+- ¿Esto se puede calcular con props y state? Hazlo en el render ✨.
+- ¿Esto sincroniza con algo fuera de React? Usa el efecto 🔧.
+
+Si sigues ese orden, tus componentes suelen quedar más pequeños, más predecibles y más fáciles de mantener.
+
+## ✍️ Conclusión
+
+`useEffect` no es malo, pero tampoco es la respuesta por defecto. Muchas veces React ya te da una solución más simple: renderizar un valor derivado, manejar una acción en un evento o mover la lógica al lugar donde realmente ocurre.
+
+La mejor señal es esta: si tu efecto solo existe para arreglar una copia de datos dentro del componente, probablemente puedas borrar el efecto y hacer el código más claro.
