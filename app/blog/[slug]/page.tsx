@@ -99,7 +99,18 @@ export async function generateMetadata({ params: _params }: PageProps<'/blog/[sl
   }
 
   const { title, publishedAt: publishedTime, summary: description, image } = post.metadata;
-  const ogImage = image ? image : `${envs.SITE_URL}/og?title=${encodeURIComponent(title)}`;
+  let ogImage = image;
+  if (!ogImage) {
+    const ogUrl = new URL('/og', envs.SITE_URL);
+    ogUrl.searchParams.set('title', title);
+    ogUrl.searchParams.set('description', description || '');
+    ogUrl.searchParams.set('author', profile.name);
+    ogUrl.searchParams.set('date', formatDate(publishedTime));
+    ogUrl.searchParams.set('category', 'Blog');
+    ogUrl.searchParams.set('url', `${envs.SITE_URL}/blog/${post.slug}`);
+    ogImage = ogUrl.toString();
+  }
+  console.log('OG Image URL:', ogImage);
 
   return {
     title,
