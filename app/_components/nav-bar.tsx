@@ -33,14 +33,14 @@ export const NavBar = ({ profile }: Props) => {
           </div>
         </Link>
 
-        <div className='hidden items-center gap-4 md:flex'>
+        <div className='flex max-md:flex-col max-md:items-start items-center gap-2 md:gap-4'>
           {navigationItems.map((item) => (
             <Link key={item.href} href={item.href} className={linkClass.base()}>
               {item.label}
             </Link>
           ))}
         </div>
-        <div className='flex items-center'>
+        <div className='flex max-md:flex-col items-center'>
           <Link href={profile.linkedin as Route} target='_blank' rel='noreferrer' className={btnClass}>
             <LinkedinIcon />
           </Link>
