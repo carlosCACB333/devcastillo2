@@ -26,16 +26,10 @@ export function GET(request: Request) {
         {/* Main content */}
         <div tw='flex flex-col gap-6'>
           {/* Title */}
-          <h1 tw='flex text-6xl font-black  leading-tight max-w-5xl'>
-            {title}
-          </h1>
+          <h1 tw='flex text-6xl font-black  leading-tight max-w-5xl'>{title}</h1>
 
           {/* Description */}
-          {description && (
-            <p tw='text-xl text-slate-600 max-w-4xl leading-relaxed'>
-              {description}
-            </p>
-          )}
+          {description && <p tw='text-xl text-slate-600 max-w-4xl leading-relaxed'>{description}</p>}
         </div>
 
         {/* Footer */}
