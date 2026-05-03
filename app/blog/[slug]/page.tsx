@@ -110,7 +110,6 @@ export async function generateMetadata({ params: _params }: PageProps<'/blog/[sl
     ogUrl.searchParams.set('url', `${envs.SITE_URL}/blog/${post.slug}`);
     ogImage = ogUrl.toString();
   }
-  console.log('OG Image URL:', ogImage);
 
   return {
     title,
