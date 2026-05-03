@@ -6,6 +6,7 @@ import { CardSimple } from '../_components/card-simple';
 
 export const HomeContact = () => {
   const btnSecondary = buttonVariants({ variant: 'secondary', size: 'lg' });
+  const whatsappPhone = profile.phone.replace(/\D/g, '');
 
   return (
     <section id='contacto' className='pt-8 sm:pt-12'>
@@ -17,7 +18,9 @@ export const HomeContact = () => {
           </p>
           <Link
             className={`${btnSecondary} bg-green-600 text-white hover:bg-green-700`}
-            href={`whatsapp://send?phone=${profile.phone}&text=${encodeURIComponent(whatsappMessage)}`}
+            href={`https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}`}
+            target='_blank'
+            rel='noopener noreferrer'
           >
             <WhatsappIcon className='me-2' />
             Escribirme
