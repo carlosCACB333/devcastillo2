@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Providers } from './providers';
 import { NavBar } from './_components/nav-bar';
+import { Footer } from './_components/footer';
 import { geistMono, geistSans } from './_config/font';
 import { profile } from './_data/portfolio';
 import { Suspense } from 'react';
@@ -26,9 +27,9 @@ export default function RootLayout({
             <div className='relative overflow-hidden'>
               <div className='pointer-events-none absolute inset-x-0 top-0 -z-10 h-128 bg-[radial-gradient(circle_at_top_left,rgba(129,140,248,0.16),transparent_38%),radial-gradient(circle_at_top_right,rgba(148,163,184,0.16),transparent_28%)]' />
               <div className='pointer-events-none absolute top-40 left-1/2 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-(--app-blob) blur-3xl' />
-
               {children}
             </div>
+            <Footer />
           </Providers>
         </Suspense>
       </body>
