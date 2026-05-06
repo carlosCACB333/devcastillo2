@@ -3,7 +3,8 @@ import { envs } from './_config/envs';
 import { getBlogPosts } from './_data/posts';
 
 const createUrl = (path: Route) => {
-  return `${envs.SITE_URL}${path}`;
+  const url = new URL(path, envs.SITE_URL);
+  return url.href;
 };
 
 export default function sitemap(): MetadataRoute.Sitemap {
