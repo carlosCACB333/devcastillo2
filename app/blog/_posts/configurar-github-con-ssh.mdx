@@ -1,0 +1,113 @@
+---
+title: 'Cómo configurar GitHub con SSH'
+publishedAt: '2026-05-06'
+summary: 'Aprende a conectar tu máquina a GitHub usando claves SSH para autenticarte de forma segura y sin contraseñas.'
+---
+
+Si alguna vez te cansaste de escribir tu usuario y contraseña cada vez que haces un `git push`, las claves SSH son la solución. Con esta configuración, tu máquina y GitHub se reconocen mutuamente de forma automática y segura.
+
+## ¿Qué es SSH y por qué usarlo con GitHub?
+
+SSH (Secure Shell) es un protocolo que permite comunicaciones cifradas entre dos sistemas. En el contexto de GitHub, usarlo significa que en lugar de autenticarte con usuario y contraseña (o un token), usas un par de claves criptográficas: una **clave privada** que se queda en tu máquina y una **clave pública** que subes a GitHub.
+
+## Verificar si ya tienes claves SSH
+
+Antes de generar nuevas claves, revisa si ya tienes alguna:
+
+```bash
+ls -al ~/.ssh
+```
+
+Si ves archivos como `id_ed25519` e `id_ed25519.pub` (o `id_rsa` / `id_rsa.pub`), ya tienes un par de claves. Puedes usarlas o generar unas nuevas.
+
+## Generar una nueva clave SSH
+
+Ejecuta el siguiente comando reemplazando el correo con el que usas en GitHub:
+
+```bash
+ssh-keygen -t ed25519 -C "tu@email.com"
+```
+
+> Si tu sistema no soporta Ed25519, usa: `ssh-keygen -t rsa -b 4096 -C "tu@email.com"`
+
+El proceso te hará dos preguntas:
+
+1. **Ubicación del archivo**: presiona `Enter` para aceptar la ruta por defecto (`~/.ssh/id_ed25519`).
+2. **Passphrase**: puedes agregar una contraseña adicional para mayor seguridad, o dejarlo vacío.
+
+## Agregar la clave al agente SSH
+
+El agente SSH administra tus claves en memoria para que no tengas que escribir la passphrase cada vez.
+
+```bash
+# Iniciar el agente en segundo plano
+eval "$(ssh-agent -s)"
+
+# Agregar tu clave privada al agente
+ssh-add ~/.ssh/id_ed25519
+```
+
+## Copiar la clave pública
+
+Necesitas copiar el contenido de tu clave pública para pegarlo en GitHub:
+
+```bash
+# macOS
+pbcopy < ~/.ssh/id_ed25519.pub
+
+# Linux
+cat ~/.ssh/id_ed25519.pub
+# Copia el output manualmente
+
+# Windows (Git Bash)
+clip < ~/.ssh/id_ed25519.pub
+```
+
+## Agregar la clave pública a GitHub
+
+1. Ve a [github.com](https://github.com) e inicia sesión.
+2. Haz clic en tu foto de perfil → **Settings**.
+3. En el menú lateral, selecciona **SSH and GPG keys**.
+4. Haz clic en **New SSH key**.
+5. Dale un título descriptivo (ej: `MacBook Pro 2025`) y pega tu clave pública en el campo **Key**.
+6. Haz clic en **Add SSH key**.
+
+## Probar la conexión
+
+Verifica que todo esté funcionando correctamente:
+
+```bash
+ssh -T git@github.com
+```
+
+Si es la primera vez que te conectas, verás un mensaje preguntando si confías en el host. Escribe `yes` y presiona `Enter`. Si la configuración es correcta, verás:
+
+```
+Hi tu-usuario! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+## Clonar repositorios usando SSH
+
+A partir de ahora, al clonar repositorios usa la URL SSH en lugar de HTTPS:
+
+```bash
+# En lugar de esto (HTTPS):
+git clone https://github.com/usuario/repositorio.git
+
+# Usa esto (SSH):
+git clone git@github.com:usuario/repositorio.git
+```
+
+## Cambiar un repositorio existente de HTTPS a SSH
+
+Si ya tienes un repositorio clonado con HTTPS, puedes cambiar su remote fácilmente:
+
+```bash
+# Ver el remote actual
+git remote -v
+
+# Cambiar a SSH
+git remote set-url origin git@github.com:usuario/repositorio.git
+```
+
+Con esto, cada `git push` y `git pull` usará SSH automáticamente, sin pedirte credenciales.
