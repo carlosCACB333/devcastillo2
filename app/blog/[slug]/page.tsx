@@ -61,7 +61,7 @@ export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'
             <span>{readingTime} min</span>
           </div>
 
-          <h1 className='title mt-5 max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl'>
+          <h1 className='text-balance mt-5 max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl'>
             {post.metadata.title}
           </h1>
 
