@@ -1,12 +1,14 @@
-import './globals.css';
+import { Spinner } from '@heroui/react';
+import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from 'next';
-import { Providers } from './providers';
-import { NavBar } from './_components/nav-bar';
+import { Suspense } from 'react';
 import { Footer } from './_components/footer';
+import { NavBar } from './_components/nav-bar';
 import { geistMono, geistSans } from './_config/font';
 import { profile } from './_data/portfolio';
-import { Suspense } from 'react';
-import { Spinner } from '@heroui/react';
+import './globals.css';
+import { Providers } from './providers';
+
 
 export default function RootLayout({
   children,
@@ -32,6 +34,7 @@ export default function RootLayout({
             <Footer />
           </Providers>
         </Suspense>
+        <Analytics />
       </body>
     </html>
   );
