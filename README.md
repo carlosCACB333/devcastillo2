@@ -33,7 +33,10 @@ title: ''
 publishedAt: ''
 summary: '2026-05-01'
 ---
+
 intro
+
 ## Subtítulo
+
 contenido
 ```

@@ -2,6 +2,10 @@ import type { MetadataRoute, Route } from 'next';
 import { envs } from './_config/envs';
 import { getBlogPosts } from './_data/posts';
 
+export const dynamic = 'force-static';
+
+const lastModified = '2026-05-01';
+
 const createUrl = (path: Route) => {
   const url = new URL(path, envs.SITE_URL);
   return url.href;
@@ -18,27 +22,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const routes: MetadataRoute.Sitemap = [
     {
       url: createUrl('/'),
-      lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 1,
+      lastModified,
     },
     {
       url: createUrl('/certificates'),
-      lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 0.8,
+      lastModified,
     },
     {
       url: createUrl('/projects'),
-      lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 0.8,
+      lastModified,
     },
     {
       url: createUrl('/blog'),
-      lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 0.8,
+      lastModified,
     },
   ];
 

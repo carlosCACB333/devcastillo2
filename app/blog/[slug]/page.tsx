@@ -1,14 +1,15 @@
-import '@/app/_styles/blog.css';
-import '@/app/_styles/code-highlighting.css';
 import { CustomMDX } from '@/app/_components/mdx';
 import { envs } from '@/app/_config/envs';
+import { profile } from '@/app/_data/portfolio';
 import { getBlogPosts } from '@/app/_data/posts';
+import '@/app/_styles/blog.css';
+import '@/app/_styles/code-highlighting.css';
+import { calculateReadingTime } from '@/app/_utils/blog';
 import { formatDate } from '@/app/_utils/date';
+import { buttonVariants, Chip } from '@heroui/react';
 import { Route } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { buttonVariants, Chip } from '@heroui/react';
-import { profile } from '@/app/_data/portfolio';
 
 export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'>) {
   const params = await _params;
@@ -18,7 +19,7 @@ export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'
     notFound();
   }
 
-  const readingTime = Math.max(1, Math.round(post.content.split(/\s+/).filter(Boolean).length / 200));
+  const readingTime = calculateReadingTime(post.content);
   const btnClass = buttonVariants({ variant: 'outline' });
 
   return (
@@ -61,7 +62,7 @@ export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'
             <span>{readingTime} min</span>
           </div>
 
-          <h1 className='text-balance mt-5 max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl'>
+          <h1 className='mt-5 max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl'>
             {post.metadata.title}
           </h1>
 

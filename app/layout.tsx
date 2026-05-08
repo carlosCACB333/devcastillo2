@@ -8,7 +8,7 @@ import { geistMono, geistSans } from './_config/font';
 import { profile } from './_data/portfolio';
 import './globals.css';
 import { Providers } from './providers';
-
+import { appLocale } from './_config/app';
 
 export default function RootLayout({
   children,
@@ -17,7 +17,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang='es-PE'
+      lang={appLocale}
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       data-scroll-behavior='smooth'
       suppressHydrationWarning
