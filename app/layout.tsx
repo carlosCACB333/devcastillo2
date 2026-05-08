@@ -1,14 +1,15 @@
 import { Spinner } from '@heroui/react';
 import { Analytics } from '@vercel/analytics/next';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { Footer } from './_components/footer';
 import { NavBar } from './_components/nav-bar';
+import { appLocale } from './_config/app';
 import { geistMono, geistSans } from './_config/font';
 import { profile } from './_data/portfolio';
 import './globals.css';
 import { Providers } from './providers';
-import { appLocale } from './_config/app';
 
 export default function RootLayout({
   children,
@@ -35,6 +36,7 @@ export default function RootLayout({
           </Providers>
         </Suspense>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
