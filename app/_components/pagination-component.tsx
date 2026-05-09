@@ -13,9 +13,9 @@ interface Props {
 
 export const PaginationComponent = ({ pagination, path, q }: Props) => {
   const linkClass = buttonVariants({ variant: 'ghost', size: 'sm' });
-  const hrefBuilder = new UrlQueryBuilder(path).set('q', q || '');
-  const prevHref = pagination.hasPreviousPage ? hrefBuilder.set('page', pagination.currentPage - 1).build() : '#';
-  const nextHref = pagination.hasNextPage ? hrefBuilder.set('page', pagination.currentPage + 1).build() : '#';
+  const baseHref = UrlQueryBuilder.create(path).set('q', q || '');
+  const prevHref = pagination.hasPreviousPage ? baseHref.set('page', pagination.currentPage - 1).build() : '#';
+  const nextHref = pagination.hasNextPage ? baseHref.set('page', pagination.currentPage + 1).build() : '#';
 
   return (
     <Card>

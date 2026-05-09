@@ -11,10 +11,11 @@ export default function Page() {
       <div className='mt-8 grid gap-4'>
         {allBlogs
           .sort((a, b) => {
-            if (new Date(a.metadata.publishedAt) > new Date(b.metadata.publishedAt)) {
-              return -1;
-            }
-            return 1;
+            const dateA = new Date(a.metadata.publishedAt);
+            const dateB = new Date(b.metadata.publishedAt);
+            if (dateA > dateB) return -1;
+            if (dateA < dateB) return 1;
+            return 0;
           })
           .map((post) => (
             <Link

@@ -1,5 +1,3 @@
-export type SearchParams = { q?: string; page?: string };
-
 export interface PaginationInfo {
   pageSize: number;
   totalCount: number;

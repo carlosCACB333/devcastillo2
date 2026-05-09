@@ -11,9 +11,7 @@ interface Props {
   q?: string;
 }
 
-export const CertificatesResults = async ({ certifications, pagination, q = '' }: Props) => {
-  'use cache';
-
+export const CertificatesResults = ({ certifications, pagination, q = '' }: Props) => {
   return (
     <section className='space-y-6 pt-4'>
       {certifications.length > 0 ? (

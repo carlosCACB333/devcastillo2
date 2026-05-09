@@ -1,19 +1,25 @@
 import { Route } from 'next';
 
 export class UrlQueryBuilder {
-  private params: URLSearchParams;
+  private constructor(
+    private basePath: Route,
+    private params: URLSearchParams,
+  ) {}
 
-  constructor(private basePath: Route) {
-    this.params = new URLSearchParams();
+  static create(basePath: Route) {
+    return new UrlQueryBuilder(basePath, new URLSearchParams());
   }
 
   set(key: string, value: string | number | boolean | undefined) {
+    const next = new URLSearchParams(this.params);
+
     if (value === undefined || (typeof value === 'string' && value.trim() === '')) {
-      this.params.delete(key);
+      next.delete(key);
     } else {
-      this.params.set(key, String(value));
+      next.set(key, String(value));
     }
-    return this;
+
+    return new UrlQueryBuilder(this.basePath, next);
   }
 
   build() {

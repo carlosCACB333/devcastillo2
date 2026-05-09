@@ -47,7 +47,7 @@ export const profile: Profile = {
   nickname: 'CC',
   avatarUrl: '/profile.webp',
   role: 'Desarrollador Full-Stack | Ingeniero de Sistemas',
-  location: 'Ancash, Perú',
+  location: 'Perú',
   email: 'carloscb8080@gmail.com',
   phone: '+51 922620827',
   website: 'https://devcastillo.com',

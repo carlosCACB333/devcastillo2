@@ -5,9 +5,7 @@ interface Props {
   totalCount: number;
 }
 
-export const CertificatesSearchSection = async ({ defaultQuery, totalCount }: Props) => {
-  'use cache';
-
+export const CertificatesSearchSection = ({ defaultQuery, totalCount }: Props) => {
   return (
     <SearchComponent
       action='/certificates'

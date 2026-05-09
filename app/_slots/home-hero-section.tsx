@@ -1,12 +1,12 @@
-import { buttonVariants, Chip, Link } from '@heroui/react';
-import { profile } from '../_data/portfolio';
-import { LinkedinIcon } from '../_components/icons';
+import { Chip, Link } from '@heroui/react';
+import { Route } from 'next';
 import { CardSimple } from '../_components/card-simple';
+import { LinkedinIcon } from '../_components/icons';
+import { ButtonLink } from '../_components/ui/button-link';
+import { NextLink } from '../_components/ui/next-link';
+import { profile } from '../_data/portfolio';
 
 export const HeroSection = () => {
-  const btnPrimary = buttonVariants({ size: 'lg' });
-  const btnSecondary = buttonVariants({ variant: 'secondary', size: 'lg' });
-
   return (
     <div className='grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-start'>
       <div id='sobre-mi' className='space-y-8'>
@@ -22,29 +22,29 @@ export const HeroSection = () => {
         </div>
 
         <div className='flex flex-col gap-3 sm:flex-row'>
-          <Link className={`${btnPrimary} space-x-1`} href={profile.linkedin} target='_blank'>
+          <ButtonLink className={`space-x-1`} href={profile.linkedin as Route} size='lg' target='_blank'>
             <LinkedinIcon />
             Ver LinkedIn
             <Link.Icon />
-          </Link>
-          <Link className={`${btnSecondary} space-x-1`} href={profile.cv} target='_blank'>
+          </ButtonLink>
+          <ButtonLink className={`space-x-1`} href={profile.cv as Route} size='lg' variant='secondary' target='_blank'>
             Descargar CV
             <Link.Icon />
-          </Link>
+          </ButtonLink>
         </div>
 
         <div className='text-muted flex flex-wrap gap-3 text-sm'>
           <span>{profile.location}</span>
           <span>·</span>
-          <Link href={profile.github} className='text-muted'>
+          <NextLink href={profile.github as Route} className='text-muted' target='_blank'>
             GitHub
             <Link.Icon />
-          </Link>
+          </NextLink>
           <span>·</span>
-          <Link href={`mailto:${profile.email}`} className='text-muted'>
+          <NextLink href={`mailto:${profile.email}`} className='text-muted' target='_blank'>
             {profile.email}
             <Link.Icon />
-          </Link>
+          </NextLink>
         </div>
       </div>
 

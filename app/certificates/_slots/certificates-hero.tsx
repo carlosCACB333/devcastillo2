@@ -1,8 +1,6 @@
 import { Chip } from '@heroui/react';
 
-export const CertificatesHero = async () => {
-  'use cache';
-
+export const CertificatesHero = () => {
   return (
     <div className='flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between'>
       <div className='max-w-3xl space-y-5'>

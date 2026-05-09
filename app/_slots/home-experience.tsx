@@ -1,5 +1,5 @@
 import { experiences } from '../_data/portfolio';
-import { ExperienceCard } from './experiencie-card';
+import { ExperienceCard } from './experience-card';
 import { SectionHeading } from './section-heading';
 
 export const HomeExperience = () => {

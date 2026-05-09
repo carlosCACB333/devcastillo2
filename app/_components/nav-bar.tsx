@@ -1,9 +1,11 @@
-import { Avatar, buttonVariants, linkVariants } from '@heroui/react';
-import { ThemeSwitch } from './theme-switch';
-import { Profile } from '../_data/portfolio';
-import Link from 'next/link';
+import { Avatar } from '@heroui/react';
 import { Route } from 'next';
+import Link from 'next/link';
+import { Profile } from '../_data/portfolio';
 import { GithubIcon, LinkedinIcon } from './icons';
+import { ThemeSwitch } from './theme-switch';
+import { ButtonLink } from './ui/button-link';
+import { NextLink } from './ui/next-link';
 
 const navigationItems: { href: Route; label: string }[] = [
   { href: '/blog', label: 'Blog' },
@@ -16,8 +18,6 @@ interface Props {
 }
 
 export const NavBar = ({ profile }: Props) => {
-  const linkClass = linkVariants();
-  const btnClass = buttonVariants({ variant: 'ghost', size: 'sm', isIconOnly: true });
 
   return (
     <nav className='sticky top-0 z-50 border-b backdrop-blur-sm'>
@@ -35,18 +35,32 @@ export const NavBar = ({ profile }: Props) => {
 
         <div className='flex items-center gap-2 max-md:flex-col max-md:items-start md:gap-4'>
           {navigationItems.map((item) => (
-            <Link key={item.href} href={item.href} className={linkClass.base()}>
+            <NextLink key={item.href} href={item.href} >
               {item.label}
-            </Link>
+            </NextLink>
           ))}
         </div>
         <div className='flex items-center max-md:flex-col'>
-          <Link href={profile.linkedin as Route} target='_blank' rel='noreferrer' className={btnClass}>
+          <ButtonLink
+            href={profile.linkedin as Route}
+            target='_blank'
+            rel='noreferrer'
+            size='sm'
+            variant='ghost'
+            isIconOnly
+          >
             <LinkedinIcon />
-          </Link>
-          <Link href={profile.github as Route} target='_blank' rel='noreferrer' className={btnClass}>
+          </ButtonLink>
+          <ButtonLink
+            href={profile.github as Route}
+            target='_blank'
+            rel='noreferrer'
+            size='sm'
+            variant='ghost'
+            isIconOnly
+          >
             <GithubIcon />
-          </Link>
+          </ButtonLink>
           <ThemeSwitch />
         </div>
       </div>

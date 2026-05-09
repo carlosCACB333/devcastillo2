@@ -5,9 +5,7 @@ interface Props {
   q?: string;
 }
 
-export const CertificatesSummary = async ({ totalCount, q = '' }: Props) => {
-  'use cache';
-
+export const CertificatesSummary = ({ totalCount, q = '' }: Props) => {
   return (
     <div className='grid gap-4 md:grid-cols-3'>
       <CardSimple titleSize='2xl' caption='Resultados' title={`${totalCount} certificados`}>

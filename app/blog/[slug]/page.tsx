@@ -1,4 +1,5 @@
 import { CustomMDX } from '@/app/_components/mdx';
+import { ButtonLink } from '@/app/_components/ui/button-link';
 import { envs } from '@/app/_config/envs';
 import { profile } from '@/app/_data/portfolio';
 import { getBlogPosts } from '@/app/_data/posts';
@@ -6,9 +7,7 @@ import '@/app/_styles/blog.css';
 import '@/app/_styles/code-highlighting.css';
 import { calculateReadingTime } from '@/app/_utils/blog';
 import { formatDate } from '@/app/_utils/date';
-import { buttonVariants, Chip } from '@heroui/react';
-import { Route } from 'next';
-import Link from 'next/link';
+import { Chip } from '@heroui/react';
 import { notFound } from 'next/navigation';
 
 export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'>) {
@@ -20,15 +19,14 @@ export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'
   }
 
   const readingTime = calculateReadingTime(post.content);
-  const btnClass = buttonVariants({ variant: 'outline' });
 
   return (
     <section className='mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14'>
       <div className='mb-4'>
-        <Link href={'/blog' as Route} className={btnClass}>
+        <ButtonLink href={'/blog'} variant='outline'>
           <span aria-hidden='true'>←</span>
           <span>Volver a los posts</span>
-        </Link>
+        </ButtonLink>
       </div>
       <script
         type='application/ld+json'
