@@ -1,8 +1,8 @@
-import type { ComponentPropsWithoutRef, JSX } from 'react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
 type IconProps = ComponentPropsWithoutRef<'svg'> & { size?: number };
 
-const Svg = ({ children, ...props }: { children: JSX.Element[] } & IconProps) => (
+const Svg = ({ children, ...props }: { children: ReactNode } & IconProps) => (
   <svg
     xmlns='http://www.w3.org/2000/svg'
     viewBox='0 0 24 24'
