@@ -25,8 +25,6 @@ export const searchCertificatesService = async ({
   'use cache';
   cacheLife('days');
 
-  console.log('Searching certifications:', { q, page });
-
   const search = q.trim();
   const skip = (page - 1) * PAGE_SIZE;
 

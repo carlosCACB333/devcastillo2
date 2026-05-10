@@ -17,6 +17,13 @@ interface Props {
   padding?: boolean;
 }
 
+const TITLE_SIZES: Record<string, string> = {
+  md: 'text-md',
+  lg: 'text-lg',
+  xl: 'text-xl',
+  '2xl': 'text-2xl',
+};
+
 export const CardSimple = ({
   caption,
   title,
@@ -29,7 +36,7 @@ export const CardSimple = ({
   footer,
   padding = true,
 }: Props) => {
-  const isExternal = href && href.startsWith('http');
+  const isExternal = href?.startsWith('http');
   const linkText = linkLabel ?? (typeof title === 'string' ? title : 'Abrir tarjeta');
 
   return (
@@ -38,7 +45,7 @@ export const CardSimple = ({
         <div className='relative aspect-4/3 overflow-hidden rounded-2xl'>
           <Image
             src={imageSrc}
-            alt={'card image'}
+            alt=''
             className='h-full w-full object-cover transition duration-500 group-hover:scale-105'
             loading='lazy'
             width={400}
@@ -54,7 +61,7 @@ export const CardSimple = ({
       <div className={`${padding ? 'space-y-6 p-6 md:p-8' : ''} ${href ? 'pointer-events-none' : ''}`}>
         <Card.Content className='space-y-3'>
           {caption && <div className='text-muted text-xs font-semibold tracking-[0.24em] uppercase'>{caption}</div>}
-          {title && <div className={`text-${titleSize} font-semibold tracking-tight`}>{title}</div>}
+          {title && <div className={`${TITLE_SIZES[titleSize]} font-semibold tracking-tight`}>{title}</div>}
           {children && <div className='text-foreground-2 text-sm leading-7'>{children}</div>}
         </Card.Content>
         {footer && (

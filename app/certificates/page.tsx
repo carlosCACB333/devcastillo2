@@ -8,7 +8,6 @@ import { CertificatesSearchSection } from './_slots/certificates-search-section'
 import { CertificatesSummary } from './_slots/certificates-summary';
 
 export default async function CertificatesPage({ searchParams }: PageProps<'/certificates'>) {
-
   const { page, q } = parseSearchParams(await searchParams);
   const { certifications, pagination } = await searchCertificatesService({ q, page });
 

@@ -6,9 +6,7 @@ export default function NotFound() {
       <div className='w-full max-w-lg space-y-8 text-center'>
         <div className='space-y-4'>
           <div className='flex justify-center'>
-            <span className='text-6xl font-bold tracking-tight text-foreground/40'>
-              404
-            </span>
+            <span className='text-foreground/40 text-6xl font-bold tracking-tight'>404</span>
           </div>
           <h1 className='text-4xl font-semibold tracking-tight'>Página no encontrada</h1>
           <p className='text-foreground-2 mx-auto max-w-md text-base leading-7'>

@@ -29,9 +29,7 @@ export default function RootLayout({
           <div className='relative flex flex-1 flex-col overflow-hidden'>
             <div className='pointer-events-none absolute inset-x-0 top-0 -z-10 h-128 bg-[radial-gradient(circle_at_top_left,rgba(129,140,248,0.16),transparent_38%),radial-gradient(circle_at_top_right,rgba(148,163,184,0.16),transparent_28%)]' />
             <div className='pointer-events-none absolute top-40 left-1/2 -z-10 h-72 w-72 -translate-x-1/2 rounded-full bg-(--app-blob) blur-3xl' />
-            <Suspense fallback={<Spinner />}>
-              {children}
-            </Suspense>
+            <Suspense fallback={<Spinner />}>{children}</Suspense>
           </div>
           <Footer />
         </Providers>

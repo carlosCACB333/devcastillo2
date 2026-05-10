@@ -8,7 +8,6 @@ import { ProjectsSearchSection } from './_slots/projects-search-section';
 import { ProjectsSummary } from './_slots/projects-summary';
 
 export default async function ProjectsPage({ searchParams }: PageProps<'/projects'>) {
-
   const { page, q } = parseSearchParams(await searchParams);
   const { projects, pagination } = await searchProjectsService({ q, page });
 

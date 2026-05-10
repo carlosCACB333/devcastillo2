@@ -22,8 +22,6 @@ export const searchProjectsService = async ({ q = '', page = 1 }: SearchParams):
   'use cache';
   cacheLife('days');
 
-  console.log('Searching projects: ', { q, page });
-
   const search = q.trim();
   const skip = (page - 1) * PAGE_SIZE;
 

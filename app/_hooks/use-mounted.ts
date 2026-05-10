@@ -4,5 +4,5 @@ export const useMounted = () =>
   useSyncExternalStore(
     () => () => {},
     () => true,
-    () => false,
+    () => false
   );

@@ -3,7 +3,7 @@ import { Route } from 'next';
 export class UrlQueryBuilder {
   private constructor(
     private basePath: Route,
-    private params: URLSearchParams,
+    private params: URLSearchParams
   ) {}
 
   static create(basePath: Route) {
