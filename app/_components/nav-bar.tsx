@@ -20,7 +20,7 @@ interface Props {
 export const NavBar = ({ profile }: Props) => {
   return (
     <nav className='sticky top-0 z-50 border-b backdrop-blur-sm'>
-      <div className='mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8'>
+      <div className='mx-auto flex w-full max-w-6xl items-center justify-between px-4 py-3 sm:px-6 md:h-(--nav-height) md:py-0 lg:px-8'>
         <Link className='flex items-center gap-4' href='/'>
           <Avatar>
             <Avatar.Image src={profile.avatarUrl} alt={profile.name} />

@@ -152,7 +152,7 @@ async function BlogPostContent({ params }: Pick<PageProps<'/blog/[slug]'>, 'para
             </header>
 
             <div className='mt-8 lg:hidden'>
-              <TableOfContentsMobile items={toc} />
+              <TableOfContentsMobile items={toc} targetId={CONTENT_ID} />
             </div>
 
             <div id={CONTENT_ID} className='prose mt-4'>
@@ -163,7 +163,8 @@ async function BlogPostContent({ params }: Pick<PageProps<'/blog/[slug]'>, 'para
           </article>
 
           <aside className='hidden lg:block'>
-            <div className='sticky top-28'>
+            {/* top = navbar + borde + padding superior (lg:py-16): coincide con la posición inicial, así no se desplaza. */}
+            <div className='sticky top-(--toc-top) [--toc-max-height:calc(100vh-var(--toc-top)-2rem)] [--toc-top:calc(var(--nav-height)+1px+4rem)]'>
               <TableOfContents items={toc} targetId={CONTENT_ID} />
             </div>
           </aside>

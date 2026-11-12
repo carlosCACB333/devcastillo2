@@ -3,6 +3,9 @@
 
 @layer base {
   :root {
+    /* Altura fija de la navbar en md+ (sin el borde inferior de 1px). Base de los elementos sticky. */
+    --nav-height: 4rem;
+
     /* custom */
     --app-body-bg:
       radial-gradient(circle at top, rgba(99, 102, 241, 0.1), transparent 36%),
