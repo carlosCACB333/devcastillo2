@@ -1,3 +1,4 @@
+import { pageMetadata } from '@/app/_config/seo';
 import { Metadata } from 'next';
 import { SearchPageShell } from '../_components/search-page-shell';
 import { parseSearchParams } from '../_utils/search-params';
@@ -21,8 +22,9 @@ export default async function CertificatesPage({ searchParams }: PageProps<'/cer
   );
 }
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Certificados',
   description:
-    'Todos los certificados y certificaciones publicados, con opciones de búsqueda y paginación para facilitar su consulta.',
-};
+    'Certificados y certificaciones de Carlos Castillo en desarrollo de software, cloud y tecnologías web, con búsqueda y paginación.',
+  path: '/certificates',
+});

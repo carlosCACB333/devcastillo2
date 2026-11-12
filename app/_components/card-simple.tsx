@@ -45,11 +45,10 @@ export const CardSimple = ({
         <div className='relative aspect-4/3 overflow-hidden rounded-2xl'>
           <Image
             src={imageSrc}
-            alt=''
-            className='h-full w-full object-cover transition duration-500 group-hover:scale-105'
-            loading='lazy'
-            width={400}
-            height={200}
+            alt={typeof title === 'string' ? title : ''}
+            className='object-cover transition duration-500 group-hover:scale-105'
+            fill
+            sizes='(min-width: 768px) 50vw, 100vw'
           />
           {imageCaption && (
             <div className='absolute inset-x-0 bottom-0 bg-linear-to-t from-black/60 via-black/20 to-transparent p-4'>

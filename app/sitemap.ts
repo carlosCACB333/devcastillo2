@@ -1,21 +1,20 @@
 import type { MetadataRoute, Route } from 'next';
-import { envs } from './_config/envs';
+import { absoluteUrl } from './_config/seo';
 import { getBlogPosts } from './_data/posts';
 
 const lastModified = '2026-05-01';
 
-const createUrl = (path: Route) => {
-  const url = new URL(path, envs.SITE_URL);
-  return url.href;
-};
+const createUrl = (path: Route) => absoluteUrl(path);
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const blogRoutes: MetadataRoute.Sitemap = getBlogPosts().map((post) => ({
-    url: `${createUrl('/blog')}/${post.slug}`,
+    url: absoluteUrl(`/blog/${post.slug}`),
     lastModified: post.metadata.publishedAt,
     changeFrequency: 'yearly',
     priority: 0.7,
   }));
+
+  const latestPost = getBlogPosts()[0]?.metadata.publishedAt ?? lastModified;
 
   const routes: MetadataRoute.Sitemap = [
     {
@@ -38,9 +37,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: createUrl('/blog'),
-      changeFrequency: 'yearly',
+      changeFrequency: 'monthly',
       priority: 0.8,
-      lastModified,
+      lastModified: latestPost,
     },
   ];
 

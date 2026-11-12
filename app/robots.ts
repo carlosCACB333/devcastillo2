@@ -1,14 +1,15 @@
-import { envs } from './_config/envs';
+import type { MetadataRoute } from 'next';
+import { absoluteUrl, siteUrl } from './_config/seo';
 
-const url = new URL('/sitemap.xml', envs.SITE_URL);
-
-export default function robots() {
+export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: '*',
+        allow: '/',
       },
     ],
-    sitemap: url,
+    sitemap: absoluteUrl('/sitemap.xml'),
+    host: siteUrl,
   };
 }

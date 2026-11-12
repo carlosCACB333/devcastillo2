@@ -1,3 +1,4 @@
+import { pageMetadata } from '@/app/_config/seo';
 import { Metadata } from 'next';
 import { SearchPageShell } from '../_components/search-page-shell';
 import { parseSearchParams } from '../_utils/search-params';
@@ -21,7 +22,9 @@ export default async function ProjectsPage({ searchParams }: PageProps<'/project
   );
 }
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Proyectos',
-  description: 'Proyectos realizados y experiencias técnicas.',
-};
+  description:
+    'Proyectos de desarrollo web y software de Carlos Castillo: aplicaciones full-stack, APIs y arquitecturas con Next.js, React y microservicios.',
+  path: '/projects',
+});

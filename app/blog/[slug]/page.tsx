@@ -1,24 +1,28 @@
 import { CustomMDX } from '@/app/_components/mdx';
 import { ButtonLink } from '@/app/_components/ui/button-link';
-import { envs } from '@/app/_config/envs';
+import { JsonLd } from '@/app/_components/json-ld';
+import { appLocale } from '@/app/_config/app';
+import { absoluteUrl, personJsonLd, siteUrl } from '@/app/_config/seo';
 import { profile } from '@/app/_data/portfolio';
-import { getBlogPosts } from '@/app/_data/posts';
+import { BlogPost, getBlogPost, getBlogPosts } from '@/app/_data/posts';
 import '@/app/_styles/blog.css';
 import '@/app/_styles/code-highlighting.css';
 import { calculateReadingTime } from '@/app/_utils/blog';
 import { formatDate } from '@/app/_utils/date';
 import { Chip } from '@heroui/react';
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
 export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'>) {
-  const params = await _params;
-  const post = getBlogPosts().find((post) => post.slug === params.slug);
+  const { slug } = await _params;
+  const post = getBlogPost(slug);
 
   if (!post) {
     notFound();
   }
 
   const readingTime = calculateReadingTime(post.content);
+  const postUrl = absoluteUrl(`/blog/${post.slug}`);
 
   return (
     <section className='mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14'>
@@ -28,26 +32,35 @@ export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'
           <span>Volver a los posts</span>
         </ButtonLink>
       </div>
-      <script
-        type='application/ld+json'
-        suppressHydrationWarning
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'BlogPosting',
-            headline: post.metadata.title,
-            datePublished: post.metadata.publishedAt,
-            dateModified: post.metadata.publishedAt,
-            description: post.metadata.summary,
-            image: post.metadata.image
-              ? `${envs.SITE_URL}${post.metadata.image}`
-              : `/og?title=${encodeURIComponent(post.metadata.title)}`,
-            url: `${envs.SITE_URL}/blog/${post.slug}`,
-            author: {
-              '@type': 'Person',
-              name: profile.name,
+      <JsonLd
+        data={{
+          '@context': 'https://schema.org',
+          '@graph': [
+            {
+              '@type': 'BlogPosting',
+              '@id': `${postUrl}#article`,
+              headline: post.metadata.title,
+              description: post.metadata.summary,
+              datePublished: post.metadata.publishedAt,
+              dateModified: post.metadata.publishedAt,
+              image: getPostImage(post),
+              url: postUrl,
+              mainEntityOfPage: postUrl,
+              inLanguage: appLocale,
+              timeRequired: `PT${readingTime}M`,
+              wordCount: post.content.split(/\s+/).filter(Boolean).length,
+              author: { '@type': 'Person', '@id': personJsonLd['@id'], name: profile.name, url: siteUrl },
+              publisher: { '@type': 'Person', '@id': personJsonLd['@id'], name: profile.name },
             },
-          }),
+            {
+              '@type': 'BreadcrumbList',
+              itemListElement: [
+                { '@type': 'ListItem', position: 1, name: 'Inicio', item: absoluteUrl('/') },
+                { '@type': 'ListItem', position: 2, name: 'Blog', item: absoluteUrl('/blog') },
+                { '@type': 'ListItem', position: 3, name: post.metadata.title, item: postUrl },
+              ],
+            },
+          ],
         }}
       />
       <div className='relative overflow-hidden rounded-4xl border px-6 py-8 shadow-2xl backdrop-blur-xl sm:px-10 sm:py-12'>
@@ -89,41 +102,47 @@ export async function generateStaticParams() {
   }));
 }
 
-export async function generateMetadata({ params: _params }: PageProps<'/blog/[slug]'>) {
-  const params = await _params;
+const getPostImage = (post: BlogPost) => {
+  const { title, summary, publishedAt, image } = post.metadata;
+  if (image) return absoluteUrl(image);
 
-  const post = getBlogPosts().find((post) => post.slug === params.slug);
+  const ogUrl = new URL(absoluteUrl('/og'));
+  ogUrl.searchParams.set('title', title);
+  ogUrl.searchParams.set('description', summary || '');
+  ogUrl.searchParams.set('author', profile.name);
+  ogUrl.searchParams.set('date', formatDate(publishedAt));
+  ogUrl.searchParams.set('category', 'Blog');
+  ogUrl.searchParams.set('url', absoluteUrl(`/blog/${post.slug}`));
+  return ogUrl.toString();
+};
+
+export async function generateMetadata({ params }: PageProps<'/blog/[slug]'>): Promise<Metadata> {
+  const { slug } = await params;
+  const post = getBlogPost(slug);
   if (!post) {
-    return;
+    return {};
   }
 
-  const { title, publishedAt: publishedTime, summary: description, image } = post.metadata;
-  let ogImage = image;
-  if (!ogImage) {
-    const ogUrl = new URL('/og', envs.SITE_URL);
-    ogUrl.searchParams.set('title', title);
-    ogUrl.searchParams.set('description', description || '');
-    ogUrl.searchParams.set('author', profile.name);
-    ogUrl.searchParams.set('date', formatDate(publishedTime));
-    ogUrl.searchParams.set('category', 'Blog');
-    ogUrl.searchParams.set('url', `${envs.SITE_URL}/blog/${post.slug}`);
-    ogImage = ogUrl.toString();
-  }
+  const { title, publishedAt: publishedTime, summary: description } = post.metadata;
+  const path = `/blog/${post.slug}`;
+  const ogImage = { url: getPostImage(post), width: 1200, height: 630, alt: title };
 
   return {
     title,
     description,
+    authors: [{ name: profile.name, url: siteUrl }],
+    alternates: { canonical: path },
     openGraph: {
       title,
       description,
       type: 'article',
+      locale: 'es_PE',
+      siteName: profile.name,
       publishedTime,
-      url: `${envs.SITE_URL}/blog/${post.slug}`,
-      images: [
-        {
-          url: ogImage,
-        },
-      ],
+      modifiedTime: publishedTime,
+      authors: [profile.name],
+      url: path,
+      images: [ogImage],
     },
     twitter: {
       card: 'summary_large_image',

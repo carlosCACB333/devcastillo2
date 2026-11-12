@@ -32,6 +32,20 @@ function getMDXData(dir: string) {
   });
 }
 
-export function getBlogPosts() {
-  return getMDXData(path.join(process.cwd(), 'app', 'blog', '_posts'));
+export type BlogPost = ReturnType<typeof getMDXData>[number];
+
+let postsCache: BlogPost[] | undefined;
+
+/**
+ * Lee los posts una sola vez por proceso y los devuelve ordenados del más reciente al más antiguo.
+ */
+export function getBlogPosts(): BlogPost[] {
+  postsCache ??= getMDXData(path.join(process.cwd(), 'app', 'blog', '_posts')).sort(
+    (a, b) => new Date(b.metadata.publishedAt).getTime() - new Date(a.metadata.publishedAt).getTime()
+  );
+  return postsCache;
+}
+
+export function getBlogPost(slug: string) {
+  return getBlogPosts().find((post) => post.slug === slug);
 }

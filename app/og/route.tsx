@@ -48,6 +48,10 @@ export function GET(request: Request) {
     {
       width: 1200,
       height: 630,
+      headers: {
+        // Las imágenes OG son deterministas según los query params: se cachean en el CDN.
+        'Cache-Control': 'public, max-age=86400, s-maxage=31536000, stale-while-revalidate=86400',
+      },
     }
   );
 }
