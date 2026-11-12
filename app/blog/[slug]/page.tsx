@@ -14,11 +14,37 @@ import type { Metadata, Route } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
 
 const CONTENT_ID = 'post-content';
 
-export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'>) {
-  const { slug } = await _params;
+/**
+ * La página es síncrona: el contenedor y el esqueleto forman el App Shell compartido por todos los posts
+ * (Partial Prefetching). El slug se lee dentro de <Suspense>, así la navigación es instantánea.
+ * Los posts de `generateStaticParams` se prerenderizan completos, así que el HTML no pierde contenido.
+ */
+export default function BlogPostPage({ params }: PageProps<'/blog/[slug]'>) {
+  return (
+    <div className='mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16'>
+      <Suspense fallback={<PostSkeleton />}>
+        <BlogPostContent params={params} />
+      </Suspense>
+    </div>
+  );
+}
+
+const PostSkeleton = () => (
+  <div aria-hidden='true' className='mx-auto max-w-3xl animate-pulse space-y-6 lg:mx-0'>
+    <div className='h-4 w-16 rounded bg-(--surface)' />
+    <div className='mt-10 h-4 w-48 rounded bg-(--surface)' />
+    <div className='h-12 w-full rounded-lg bg-(--surface)' />
+    <div className='h-12 w-2/3 rounded-lg bg-(--surface)' />
+    <div className='h-20 w-full rounded-lg bg-(--surface)' />
+  </div>
+);
+
+async function BlogPostContent({ params }: Pick<PageProps<'/blog/[slug]'>, 'params'>) {
+  const { slug } = await params;
   const post = getBlogPost(slug);
 
   if (!post) {
@@ -70,7 +96,7 @@ export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'
           ],
         }}
       />
-      <div className='mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16'>
+      <div>
         <div className='lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-16 xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-24'>
           <article className='mx-auto w-full max-w-3xl min-w-0'>
             <header id='top' className='scroll-mt-32'>
