@@ -27,11 +27,9 @@
   margin-bottom: 1.75rem;
   overflow-x: auto;
   border: 1px solid var(--app-border);
-  border-radius: 1rem;
+  border-radius: 0.75rem;
   background: color-mix(in oklab, var(--surface) 86%, var(--color-background) 14%);
-  box-shadow:
-    0 1px 2px color-mix(in oklab, var(--color-foreground) 8%, transparent),
-    0 18px 42px color-mix(in oklab, var(--color-foreground) 10%, transparent);
+  font-size: 0.875rem;
 }
 
 .prose pre code {

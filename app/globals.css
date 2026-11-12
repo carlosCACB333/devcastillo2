@@ -23,6 +23,12 @@
     --app-blob: rgba(255, 255, 255, 0.08);
   }
 
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+
   body {
     min-height: 100vh;
     background: var(--app-body-bg);

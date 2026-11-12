@@ -1,5 +1,4 @@
 import { CustomMDX } from '@/app/_components/mdx';
-import { ButtonLink } from '@/app/_components/ui/button-link';
 import { JsonLd } from '@/app/_components/json-ld';
 import { appLocale } from '@/app/_config/app';
 import { absoluteUrl, personJsonLd, siteUrl } from '@/app/_config/seo';
@@ -7,11 +6,16 @@ import { profile } from '@/app/_data/portfolio';
 import { BlogPost, getBlogPost, getBlogPosts } from '@/app/_data/posts';
 import '@/app/_styles/blog.css';
 import '@/app/_styles/code-highlighting.css';
-import { calculateReadingTime } from '@/app/_utils/blog';
+import { calculateReadingTime, extractToc } from '@/app/_utils/blog';
+import { ReadingProgress } from '../_components/reading-progress';
+import { TableOfContents, TableOfContentsMobile } from '../_components/table-of-contents';
 import { formatDate } from '@/app/_utils/date';
-import { Chip } from '@heroui/react';
-import type { Metadata } from 'next';
+import type { Metadata, Route } from 'next';
+import Image from 'next/image';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
+
+const CONTENT_ID = 'post-content';
 
 export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'>) {
   const { slug } = await _params;
@@ -23,15 +27,16 @@ export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'
 
   const readingTime = calculateReadingTime(post.content);
   const postUrl = absoluteUrl(`/blog/${post.slug}`);
+  const toc = extractToc(post.content);
+
+  const posts = getBlogPosts();
+  const index = posts.findIndex((p) => p.slug === post.slug);
+  const newer = posts[index - 1];
+  const older = posts[index + 1];
 
   return (
-    <section className='mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14'>
-      <div className='mb-4'>
-        <ButtonLink href={'/blog'} variant='outline'>
-          <span aria-hidden='true'>←</span>
-          <span>Volver a los posts</span>
-        </ButtonLink>
-      </div>
+    <>
+      <ReadingProgress targetId={CONTENT_ID} />
       <JsonLd
         data={{
           '@context': 'https://schema.org',
@@ -63,36 +68,90 @@ export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'
           ],
         }}
       />
-      <div className='relative overflow-hidden rounded-4xl border px-6 py-8 shadow-2xl backdrop-blur-xl sm:px-10 sm:py-12'>
-        <div>
-          <div className='text-muted flex flex-wrap items-center gap-3 text-xs tracking-[0.28em] uppercase'>
-            <span>Blog</span>
-            <span className='h-1 w-1 rounded-full bg-current opacity-40' />
-            <span>{formatDate(post.metadata.publishedAt)}</span>
-            <span className='h-1 w-1 rounded-full bg-current opacity-40' />
-            <span>{readingTime} min</span>
-          </div>
+      <div className='mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16'>
+        <div className='lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:gap-16 xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-24'>
+          <article className='mx-auto w-full max-w-3xl min-w-0'>
+            <header id='top' className='scroll-mt-32'>
+              <Link
+                href='/blog'
+                className='text-muted hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors'
+              >
+                <span aria-hidden='true'>←</span> Blog
+              </Link>
 
-          <h1 className='mt-5 max-w-3xl text-4xl font-semibold tracking-tight text-balance sm:text-5xl'>
-            {post.metadata.title}
-          </h1>
+              <div className='text-muted mt-10 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm'>
+                <time dateTime={post.metadata.publishedAt}>{formatDate(post.metadata.publishedAt)}</time>
+                <span aria-hidden='true'>·</span>
+                <span>{readingTime} min de lectura</span>
+              </div>
 
-          {post.metadata.summary ? (
-            <p className='text-foreground-2 mt-5 max-w-3xl text-base leading-8 sm:text-lg'>{post.metadata.summary}</p>
-          ) : null}
+              <h1 className='mt-4 text-4xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-5xl'>
+                {post.metadata.title}
+              </h1>
 
-          <div className='mt-8 flex flex-wrap items-center gap-3 text-sm'>
-            <Chip size='lg'>Lectura pausada</Chip>
-            <Chip size='lg'>{readingTime} min de lectura</Chip>
-          </div>
-          <article className='prose mt-10'>
-            <CustomMDX source={post.content} />
+              {post.metadata.summary ? (
+                <p className='text-foreground-2 mt-6 text-lg leading-8 text-pretty'>{post.metadata.summary}</p>
+              ) : null}
+
+              <div className='mt-8 flex items-center gap-3 border-b border-(--app-border) pb-8'>
+                <Image src={profile.avatarUrl} alt='' width={36} height={36} className='rounded-full' />
+                <div className='text-sm leading-tight'>
+                  <p className='font-medium'>{profile.name}</p>
+                  <p className='text-muted'>{profile.role.split('|')[0].trim()}</p>
+                </div>
+              </div>
+            </header>
+
+            <div className='mt-8 lg:hidden'>
+              <TableOfContentsMobile items={toc} />
+            </div>
+
+            <div id={CONTENT_ID} className='prose mt-4'>
+              <CustomMDX source={post.content} />
+            </div>
+
+            <PostNavigation newer={newer} older={older} />
           </article>
+
+          <aside className='hidden lg:block'>
+            <div className='sticky top-28'>
+              <TableOfContents items={toc} targetId={CONTENT_ID} />
+            </div>
+          </aside>
         </div>
       </div>
-    </section>
+    </>
   );
 }
+
+const PostNavigation = ({ newer, older }: { newer?: BlogPost; older?: BlogPost }) => {
+  if (!newer && !older) return null;
+
+  return (
+    <nav aria-label='Más artículos' className='mt-16 grid gap-4 border-t border-(--app-border) pt-8 sm:grid-cols-2'>
+      {older ? (
+        <Link
+          href={`/blog/${older.slug}` as Route}
+          className='group rounded-2xl border border-(--app-border) p-5 transition-colors hover:bg-(--surface)'
+        >
+          <span className='text-muted text-xs tracking-[0.2em] uppercase'>← Anterior</span>
+          <span className='mt-2 block font-medium text-balance'>{older.metadata.title}</span>
+        </Link>
+      ) : (
+        <span className='hidden sm:block' />
+      )}
+      {newer ? (
+        <Link
+          href={`/blog/${newer.slug}` as Route}
+          className='group rounded-2xl border border-(--app-border) p-5 text-right transition-colors hover:bg-(--surface)'
+        >
+          <span className='text-muted text-xs tracking-[0.2em] uppercase'>Siguiente →</span>
+          <span className='mt-2 block font-medium text-balance'>{newer.metadata.title}</span>
+        </Link>
+      ) : null}
+    </nav>
+  );
+};
 
 export async function generateStaticParams() {
   const posts = getBlogPosts();

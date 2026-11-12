@@ -2,7 +2,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { MDXRemote, MDXRemoteProps } from 'next-mdx-remote/rsc';
 import { highlight } from 'sugar-high';
-import React, { ComponentProps } from 'react';
+import { ComponentProps } from 'react';
+import rehypeSlug from 'rehype-slug';
 
 function Table({ data }: { data: { headers: string[]; rows: string[][] } }) {
   const headers = data.headers.map((header, index) => <th key={index}>{header}</th>);
@@ -49,33 +50,17 @@ function Code({ children, ...props }: { children: string }) {
   return <code dangerouslySetInnerHTML={{ __html: codeHTML }} {...props} />;
 }
 
-function slugify(str: string) {
-  return str
-    .toString()
-    .toLowerCase()
-    .trim() // Remove whitespace from both ends of a string
-    .replace(/\s+/g, '-') // Replace spaces with -
-    .replace(/&/g, '-and-') // Replace & with 'and'
-    .replace(/[^\w\-]+/g, '') // Remove all non-word characters except for -
-    .replace(/\-\-+/g, '-'); // Replace multiple - with single -
-}
+type HeadingProps = ComponentProps<'h2'>;
 
+/** Los ids los genera rehype-slug; aquí solo se añade el enlace ancla. */
 function createHeading(level: number) {
-  const Heading = ({ children }: { children: string }) => {
-    const slug = slugify(children);
-    return React.createElement(
-      `h${level}`,
-      { id: slug },
-      [
-        React.createElement('a', {
-          href: `#${slug}`,
-          key: `link-${slug}`,
-          className: 'anchor',
-        }),
-      ],
-      children
-    );
-  };
+  const Tag = `h${level}` as 'h2';
+  const Heading = ({ id, children, ...props }: HeadingProps) => (
+    <Tag id={id} {...props}>
+      {id ? <a href={`#${id}`} className='anchor' aria-hidden='true' tabIndex={-1} /> : null}
+      {children}
+    </Tag>
+  );
 
   Heading.displayName = `Heading${level}`;
 
@@ -86,6 +71,13 @@ export function CustomMDX(props: MDXRemoteProps) {
   return (
     <MDXRemote
       {...props}
+      options={{
+        ...props.options,
+        mdxOptions: {
+          ...props.options?.mdxOptions,
+          rehypePlugins: [rehypeSlug, ...(props.options?.mdxOptions?.rehypePlugins ?? [])],
+        },
+      }}
       components={{
         h1: createHeading(1),
         h2: createHeading(2),

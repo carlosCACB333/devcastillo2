@@ -15,6 +15,19 @@
 
 .prose .anchor::after {
   content: '#';
+  color: var(--prose-muted);
+}
+
+.prose a:not(.anchor) {
+  color: var(--prose-heading);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--prose-heading) 30%, transparent);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 150ms;
+}
+
+.prose a:not(.anchor):hover {
+  text-decoration-color: currentColor;
 }
 
 .prose {
@@ -52,9 +65,14 @@
   color: var(--prose-heading);
 }
 
+.prose :is(h1, h2, h3, h4) {
+  /* Deja espacio para la navbar sticky al saltar desde el índice */
+  scroll-margin-top: 7rem;
+}
+
 .prose h2 {
-  margin-top: 2.5rem;
-  margin-bottom: 0.75rem;
+  margin-top: 3.5rem;
+  margin-bottom: 1rem;
   font-size: 1.5rem;
   font-weight: 600;
   line-height: 1.2;
@@ -63,7 +81,7 @@
 }
 
 .prose h3 {
-  margin-top: 2rem;
+  margin-top: 2.5rem;
   margin-bottom: 0.75rem;
   font-size: 1.25rem;
   font-weight: 600;

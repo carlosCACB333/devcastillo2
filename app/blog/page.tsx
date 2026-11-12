@@ -5,13 +5,14 @@ import { absoluteUrl, pageMetadata, personJsonLd } from '@/app/_config/seo';
 import { profile } from '@/app/_data/portfolio';
 import { Metadata, Route } from 'next';
 import { getBlogPosts } from '../_data/posts';
+import { calculateReadingTime } from '../_utils/blog';
 import { formatDate } from '../_utils/date';
 
 export default function Page() {
   const allBlogs = getBlogPosts();
 
   return (
-    <section className='mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14'>
+    <section className='mx-auto w-full max-w-4xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16'>
       <JsonLd
         data={{
           '@context': 'https://schema.org',
@@ -30,35 +31,39 @@ export default function Page() {
           })),
         }}
       />
-      <header className='space-y-3'>
+      <header className='border-b border-(--app-border) pb-10'>
         <h1 className='text-4xl font-semibold tracking-tight sm:text-5xl'>Blog</h1>
-        <p className='text-foreground-2 max-w-2xl text-base leading-7 sm:text-lg'>{description}</p>
+        <p className='text-foreground-2 mt-4 max-w-2xl text-lg leading-8'>{description}</p>
       </header>
-      <div className='mt-8 grid gap-4'>
+
+      <ul className='divide-y divide-(--app-border)'>
         {allBlogs.map((post) => (
-          <Link
-            key={post.slug}
-            className='group overflow-hidden rounded-[1.5rem] border px-5 py-5 shadow-lg transition-transform duration-300 hover:-translate-y-1 hover:border-neutral-300 hover:bg-white/85 hover:shadow-2xl sm:px-6 dark:hover:border-white/20 dark:hover:bg-white/8'
-            href={`/blog/${post.slug}` as Route}
-          >
-            <div className='flex flex-col gap-4 md:flex-row md:items-start md:justify-between'>
-              <div className='max-w-3xl space-y-2'>
-                <div className='text-muted flex flex-wrap items-center gap-3 text-xs tracking-[0.24em] uppercase'>
-                  <span>{formatDate(post.metadata.publishedAt)}</span>
-                  <span className='h-1 w-1 rounded-full bg-current opacity-40' />
-                  <span>Artículo</span>
-                </div>
-                <h2 className='text-2xl font-semibold tracking-tight transition-colors'>{post.metadata.title}</h2>
-                <p className='text-foreground-2 max-w-2xl text-sm leading-7 sm:text-base'>{post.metadata.summary}</p>
+          <li key={post.slug}>
+            <Link
+              href={`/blog/${post.slug}` as Route}
+              className='group grid gap-2 py-8 sm:grid-cols-[10rem_minmax(0,1fr)] sm:gap-8'
+            >
+              <div className='text-muted text-sm sm:pt-1'>
+                <time dateTime={post.metadata.publishedAt}>{formatDate(post.metadata.publishedAt)}</time>
               </div>
-              <div className='text-foreground-2 flex items-center gap-2 text-sm'>
-                <span className='hidden md:inline'>Leer</span>
-                <span className='text-lg transition-transform duration-300 group-hover:translate-x-1'>→</span>
+              <div className='space-y-2'>
+                <h2 className='text-xl font-semibold tracking-tight text-balance sm:text-2xl'>
+                  <span className='bg-linear-to-r from-current to-current bg-[length:0%_1px] bg-left-bottom bg-no-repeat transition-[background-size] duration-300 group-hover:bg-[length:100%_1px]'>
+                    {post.metadata.title}
+                  </span>
+                </h2>
+                <p className='text-foreground-2 max-w-2xl leading-7'>{post.metadata.summary}</p>
+                <p className='text-muted flex items-center gap-2 pt-1 text-sm'>
+                  <span>{calculateReadingTime(post.content)} min de lectura</span>
+                  <span aria-hidden='true' className='transition-transform duration-300 group-hover:translate-x-1'>
+                    →
+                  </span>
+                </p>
               </div>
-            </div>
-          </Link>
+            </Link>
+          </li>
         ))}
-      </div>
+      </ul>
     </section>
   );
 }
