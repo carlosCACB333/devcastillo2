@@ -2,8 +2,6 @@ import type { MetadataRoute, Route } from 'next';
 import { envs } from './_config/envs';
 import { getBlogPosts } from './_data/posts';
 
-export const dynamic = 'force-static';
-
 const lastModified = '2026-05-01';
 
 const createUrl = (path: Route) => {
