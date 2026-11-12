@@ -1,6 +1,6 @@
 import type { MetadataRoute, Route } from 'next';
 import { absoluteUrl } from './_config/seo';
-import { getBlogPosts } from './_data/posts';
+import { getBlogPosts, getPostModifiedAt } from './_data/posts';
 
 const lastModified = '2026-05-01';
 
@@ -9,12 +9,15 @@ const createUrl = (path: Route) => absoluteUrl(path);
 export default function sitemap(): MetadataRoute.Sitemap {
   const blogRoutes: MetadataRoute.Sitemap = getBlogPosts().map((post) => ({
     url: absoluteUrl(`/blog/${post.slug}`),
-    lastModified: post.metadata.publishedAt,
+    lastModified: getPostModifiedAt(post),
     changeFrequency: 'yearly',
     priority: 0.7,
   }));
 
-  const latestPost = getBlogPosts()[0]?.metadata.publishedAt ?? lastModified;
+  const latestPost = getBlogPosts().reduce(
+    (latest, post) => (getPostModifiedAt(post) > latest ? getPostModifiedAt(post) : latest),
+    lastModified
+  );
 
   const routes: MetadataRoute.Sitemap = [
     {

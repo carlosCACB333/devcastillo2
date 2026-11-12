@@ -27,6 +27,7 @@ export default function Page() {
             '@type': 'BlogPosting',
             headline: post.metadata.title,
             datePublished: post.metadata.publishedAt,
+            keywords: post.metadata.tags?.join(', '),
             url: absoluteUrl(`/blog/${post.slug}`),
           })),
         }}
@@ -53,8 +54,14 @@ export default function Page() {
                   </span>
                 </h2>
                 <p className='text-foreground-2 max-w-2xl leading-7'>{post.metadata.summary}</p>
-                <p className='text-muted flex items-center gap-2 pt-1 text-sm'>
+                <p className='text-muted flex flex-wrap items-center gap-x-2 gap-y-1 pt-1 text-sm'>
                   <span>{calculateReadingTime(post.content)} min de lectura</span>
+                  {post.metadata.tags?.length ? (
+                    <>
+                      <span aria-hidden='true'>·</span>
+                      <span>{post.metadata.tags.join(', ')}</span>
+                    </>
+                  ) : null}
                   <span aria-hidden='true' className='transition-transform duration-300 group-hover:translate-x-1'>
                     →
                   </span>

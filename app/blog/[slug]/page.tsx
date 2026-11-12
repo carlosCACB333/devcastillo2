@@ -1,9 +1,9 @@
 import { CustomMDX } from '@/app/_components/mdx';
 import { JsonLd } from '@/app/_components/json-ld';
 import { appLocale } from '@/app/_config/app';
-import { absoluteUrl, personJsonLd, siteUrl } from '@/app/_config/seo';
+import { absoluteUrl, alternatesWith, personJsonLd, siteUrl } from '@/app/_config/seo';
 import { profile } from '@/app/_data/portfolio';
-import { BlogPost, getBlogPost, getBlogPosts } from '@/app/_data/posts';
+import { BlogPost, getBlogPost, getBlogPosts, getPostModifiedAt, getRelatedPosts } from '@/app/_data/posts';
 import '@/app/_styles/blog.css';
 import '@/app/_styles/code-highlighting.css';
 import { calculateReadingTime, extractToc } from '@/app/_utils/blog';
@@ -29,10 +29,10 @@ export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'
   const postUrl = absoluteUrl(`/blog/${post.slug}`);
   const toc = extractToc(post.content);
 
-  const posts = getBlogPosts();
-  const index = posts.findIndex((p) => p.slug === post.slug);
-  const newer = posts[index - 1];
-  const older = posts[index + 1];
+  const related = getRelatedPosts(post);
+  const { publishedAt, tags = [] } = post.metadata;
+  const modifiedAt = getPostModifiedAt(post);
+  const wasUpdated = modifiedAt !== publishedAt;
 
   return (
     <>
@@ -46,9 +46,11 @@ export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'
               '@id': `${postUrl}#article`,
               headline: post.metadata.title,
               description: post.metadata.summary,
-              datePublished: post.metadata.publishedAt,
-              dateModified: post.metadata.publishedAt,
+              datePublished: publishedAt,
+              dateModified: modifiedAt,
               image: getPostImage(post),
+              keywords: tags.join(', '),
+              articleSection: tags[0],
               url: postUrl,
               mainEntityOfPage: postUrl,
               inLanguage: appLocale,
@@ -80,9 +82,17 @@ export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'
               </Link>
 
               <div className='text-muted mt-10 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm'>
-                <time dateTime={post.metadata.publishedAt}>{formatDate(post.metadata.publishedAt)}</time>
+                <time dateTime={publishedAt}>{formatDate(publishedAt)}</time>
                 <span aria-hidden='true'>·</span>
                 <span>{readingTime} min de lectura</span>
+                {wasUpdated ? (
+                  <>
+                    <span aria-hidden='true'>·</span>
+                    <span>
+                      Actualizado el <time dateTime={modifiedAt}>{formatDate(modifiedAt)}</time>
+                    </span>
+                  </>
+                ) : null}
               </div>
 
               <h1 className='mt-4 text-4xl leading-[1.1] font-semibold tracking-tight text-balance sm:text-5xl'>
@@ -91,6 +101,19 @@ export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'
 
               {post.metadata.summary ? (
                 <p className='text-foreground-2 mt-6 text-lg leading-8 text-pretty'>{post.metadata.summary}</p>
+              ) : null}
+
+              {tags.length > 0 ? (
+                <ul aria-label='Etiquetas' className='mt-6 flex flex-wrap gap-2'>
+                  {tags.map((tag) => (
+                    <li
+                      key={tag}
+                      className='text-foreground-2 rounded-full border border-(--app-border) px-3 py-1 text-xs'
+                    >
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
               ) : null}
 
               <div className='mt-8 flex items-center gap-3 border-b border-(--app-border) pb-8'>
@@ -110,7 +133,7 @@ export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'
               <CustomMDX source={post.content} />
             </div>
 
-            <PostNavigation newer={newer} older={older} />
+            <RelatedPosts posts={related} />
           </article>
 
           <aside className='hidden lg:block'>
@@ -124,31 +147,34 @@ export default async function Blog({ params: _params }: PageProps<'/blog/[slug]'
   );
 }
 
-const PostNavigation = ({ newer, older }: { newer?: BlogPost; older?: BlogPost }) => {
-  if (!newer && !older) return null;
+const RelatedPosts = ({ posts }: { posts: BlogPost[] }) => {
+  if (posts.length === 0) return null;
 
   return (
-    <nav aria-label='Más artículos' className='mt-16 grid gap-4 border-t border-(--app-border) pt-8 sm:grid-cols-2'>
-      {older ? (
-        <Link
-          href={`/blog/${older.slug}` as Route}
-          className='group rounded-2xl border border-(--app-border) p-5 transition-colors hover:bg-(--surface)'
-        >
-          <span className='text-muted text-xs tracking-[0.2em] uppercase'>← Anterior</span>
-          <span className='mt-2 block font-medium text-balance'>{older.metadata.title}</span>
-        </Link>
-      ) : (
-        <span className='hidden sm:block' />
-      )}
-      {newer ? (
-        <Link
-          href={`/blog/${newer.slug}` as Route}
-          className='group rounded-2xl border border-(--app-border) p-5 text-right transition-colors hover:bg-(--surface)'
-        >
-          <span className='text-muted text-xs tracking-[0.2em] uppercase'>Siguiente →</span>
-          <span className='mt-2 block font-medium text-balance'>{newer.metadata.title}</span>
-        </Link>
-      ) : null}
+    <nav aria-labelledby='related-heading' className='mt-20 border-t border-(--app-border) pt-10'>
+      <h2 id='related-heading' className='text-muted text-xs font-medium tracking-[0.2em] uppercase'>
+        Sigue leyendo
+      </h2>
+      <ul className='mt-4 divide-y divide-(--app-border)'>
+        {posts.map((post) => (
+          <li key={post.slug}>
+            <Link href={`/blog/${post.slug}` as Route} className='group flex items-baseline justify-between gap-6 py-5'>
+              <span className='space-y-1'>
+                <span className='group-hover:text-foreground block font-medium text-balance transition-colors'>
+                  {post.metadata.title}
+                </span>
+                <span className='text-foreground-2 line-clamp-2 block text-sm leading-6'>{post.metadata.summary}</span>
+              </span>
+              <span
+                aria-hidden='true'
+                className='text-muted shrink-0 transition-transform duration-300 group-hover:translate-x-1'
+              >
+                →
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
     </nav>
   );
 };
@@ -161,19 +187,8 @@ export async function generateStaticParams() {
   }));
 }
 
-const getPostImage = (post: BlogPost) => {
-  const { title, summary, publishedAt, image } = post.metadata;
-  if (image) return absoluteUrl(image);
-
-  const ogUrl = new URL(absoluteUrl('/og'));
-  ogUrl.searchParams.set('title', title);
-  ogUrl.searchParams.set('description', summary || '');
-  ogUrl.searchParams.set('author', profile.name);
-  ogUrl.searchParams.set('date', formatDate(publishedAt));
-  ogUrl.searchParams.set('category', 'Blog');
-  ogUrl.searchParams.set('url', absoluteUrl(`/blog/${post.slug}`));
-  return ogUrl.toString();
-};
+/** Portada del post: la del frontmatter o la generada por `opengraph-image.tsx`. */
+const getPostImage = (post: BlogPost) => absoluteUrl(post.metadata.image ?? `/blog/${post.slug}/opengraph-image`);
 
 export async function generateMetadata({ params }: PageProps<'/blog/[slug]'>): Promise<Metadata> {
   const { slug } = await params;
@@ -182,15 +197,16 @@ export async function generateMetadata({ params }: PageProps<'/blog/[slug]'>): P
     return {};
   }
 
-  const { title, publishedAt: publishedTime, summary: description } = post.metadata;
+  const { title, publishedAt: publishedTime, summary: description, tags = [] } = post.metadata;
   const path = `/blog/${post.slug}`;
-  const ogImage = { url: getPostImage(post), width: 1200, height: 630, alt: title };
+  const images = [{ url: getPostImage(post), width: 1200, height: 630, alt: title }];
 
   return {
     title,
     description,
+    keywords: tags,
     authors: [{ name: profile.name, url: siteUrl }],
-    alternates: { canonical: path },
+    alternates: alternatesWith(path),
     openGraph: {
       title,
       description,
@@ -198,16 +214,18 @@ export async function generateMetadata({ params }: PageProps<'/blog/[slug]'>): P
       locale: 'es_PE',
       siteName: profile.name,
       publishedTime,
-      modifiedTime: publishedTime,
+      modifiedTime: getPostModifiedAt(post),
       authors: [profile.name],
+      section: tags[0],
+      tags,
       url: path,
-      images: [ogImage],
+      images,
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [ogImage],
+      images,
     },
   };
 }

@@ -5,7 +5,10 @@ import { parseFrontmatter } from '../_utils/blog';
 export type Metadata = {
   title: string;
   publishedAt: string;
+  /** Fecha de la última revisión importante; si falta se usa `publishedAt`. */
+  updatedAt?: string;
   summary: string;
+  tags?: string[];
   image?: string;
 };
 
@@ -48,4 +51,25 @@ export function getBlogPosts(): BlogPost[] {
 
 export function getBlogPost(slug: string) {
   return getBlogPosts().find((post) => post.slug === slug);
+}
+
+/** Fecha de última modificación del post (para SEO, sitemap y RSS). */
+export const getPostModifiedAt = (post: BlogPost) => post.metadata.updatedAt ?? post.metadata.publishedAt;
+
+/**
+ * Posts relacionados: primero los que comparten más etiquetas, luego los más recientes.
+ */
+export function getRelatedPosts(post: BlogPost, limit = 3): BlogPost[] {
+  const tags = new Set(post.metadata.tags?.map((tag) => tag.toLowerCase()));
+
+  return getBlogPosts()
+    .filter((candidate) => candidate.slug !== post.slug)
+    .map((candidate, index) => ({
+      candidate,
+      index,
+      score: candidate.metadata.tags?.filter((tag) => tags.has(tag.toLowerCase())).length ?? 0,
+    }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .slice(0, limit)
+    .map(({ candidate }) => candidate);
 }

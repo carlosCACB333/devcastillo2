@@ -34,6 +34,20 @@ export const personJsonLd = {
   sameAs: [profile.linkedin, profile.github],
 };
 
+export const rssFeed = {
+  path: '/blog/rss.xml',
+  title: `Blog de ${profile.name}`,
+} as const;
+
+/**
+ * `alternates` se reemplaza (no se fusiona) en cada ruta, así que el enlace al RSS
+ * se añade en cada página para que los lectores de feeds lo descubran desde cualquier URL.
+ */
+export const alternatesWith = (canonical: string): Metadata['alternates'] => ({
+  canonical,
+  types: { 'application/rss+xml': [{ url: rssFeed.path, title: rssFeed.title }] },
+});
+
 interface PageMetadataInput {
   title: string;
   description: string;
@@ -47,7 +61,7 @@ interface PageMetadataInput {
 export const pageMetadata = ({ title, description, path }: PageMetadataInput): Metadata => ({
   title,
   description,
-  alternates: { canonical: path },
+  alternates: alternatesWith(path),
   openGraph: {
     type: 'website',
     locale: 'es_PE',

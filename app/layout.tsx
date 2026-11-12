@@ -8,7 +8,7 @@ import { JsonLd } from './_components/json-ld';
 import { NavBar } from './_components/nav-bar';
 import { appLocale } from './_config/app';
 import { geistMono, geistSans } from './_config/font';
-import { personJsonLd, siteDescription, siteKeywords, siteUrl } from './_config/seo';
+import { alternatesWith, personJsonLd, siteDescription, siteKeywords, siteUrl } from './_config/seo';
 import { profile } from './_data/portfolio';
 import './globals.css';
 import { Providers } from './providers';
@@ -71,9 +71,7 @@ export const metadata: Metadata = {
   authors: [{ name: profile.name, url: siteUrl }],
   creator: profile.name,
   publisher: profile.name,
-  alternates: {
-    canonical: '/',
-  },
+  alternates: alternatesWith('/'),
   openGraph: {
     type: 'website',
     locale: 'es_PE',

@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { MDXRemote, MDXRemoteProps } from 'next-mdx-remote/rsc';
 import { highlight } from 'sugar-high';
 import { ComponentProps } from 'react';
-import rehypeSlug from 'rehype-slug';
+import rehypeHeadingIds from '../_libs/rehype-heading-ids';
 
 function Table({ data }: { data: { headers: string[]; rows: string[][] } }) {
   const headers = data.headers.map((header, index) => <th key={index}>{header}</th>);
@@ -52,7 +52,7 @@ function Code({ children, ...props }: { children: string }) {
 
 type HeadingProps = ComponentProps<'h2'>;
 
-/** Los ids los genera rehype-slug; aquí solo se añade el enlace ancla. */
+/** Los ids los genera rehypeHeadingIds; aquí solo se añade el enlace ancla. */
 function createHeading(level: number) {
   const Tag = `h${level}` as 'h2';
   const Heading = ({ id, children, ...props }: HeadingProps) => (
@@ -75,7 +75,7 @@ export function CustomMDX(props: MDXRemoteProps) {
         ...props.options,
         mdxOptions: {
           ...props.options?.mdxOptions,
-          rehypePlugins: [rehypeSlug, ...(props.options?.mdxOptions?.rehypePlugins ?? [])],
+          rehypePlugins: [rehypeHeadingIds, ...(props.options?.mdxOptions?.rehypePlugins ?? [])],
         },
       }}
       components={{
